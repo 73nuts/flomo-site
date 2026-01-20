@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>阿鸭的随笔</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: linear-gradient(160deg, #fdfbfb 0%, #ebedee 100%);
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --text: #333333;
+      --text-secondary: #666666;
+      --text-muted: #aaaaaa;
+      --shadow: 0 2px 8px rgba(0,0,0,0.04), 0 4px 24px rgba(0,0,0,0.06);
+      --shadow-hover: 0 4px 12px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.1);
+      --radius: 24px;
+      --radius-sm: 16px;
+      --serif: 'Noto Serif SC', 'Songti SC', Georgia, serif;
+      --sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--serif);
+      background: linear-gradient(160deg, #fdfbfb 0%, #ebedee 100%);
+      background-attachment: fixed;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* Main Card */
+    .main-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 48px 40px 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: var(--shadow);
+    }
+
+    /* Profile */
+    .profile {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+
+    .name {
+      font-size: 22px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .bio {
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Nav Links */
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 20px;
+      background: #f8f8f8;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      background: #f0f0f0;
+      transform: translateX(4px);
+    }
+
+    .nav-link:active {
+      transform: scale(0.98);
+    }
+
+    .nav-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .nav-icon.gold {
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    }
+
+    .nav-icon.blue {
+      background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+    }
+
+    .nav-text {
+      flex: 1;
+    }
+
+    .nav-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .nav-desc {
+      font-family: var(--sans);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .nav-arrow {
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      body {
+        padding: 16px;
+        align-items: flex-start;
+        padding-top: 60px;
+      }
+
+      .main-card {
+        padding: 40px 28px 32px;
+        border-radius: 20px;
+      }
+
+      .avatar {
+        width: 80px;
+        height: 80px;
+      }
+
+      .name {
+        font-size: 20px;
+      }
+
+      .nav-link {
+        padding: 16px 18px;
+      }
+    }
+
+    /* Selection */
+    ::selection {
+      background: #e8e8e8;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-card">
+    <div class="profile">
+      <img src="avatar.jpg" alt="阿鸭" class="avatar">
+      <h1 class="name">阿鸭的随笔</h1>
+      <p class="bio">记录生活中的碎片与光亮</p>
+    </div>
+    <nav class="nav-links">
+      <a href="jiguang/index.html" class="nav-link">
+        <div class="nav-icon gold">✨</div>
+        <div class="nav-text">
+          <div class="nav-title">吉光片羽</div>
+          <div class="nav-desc">365 条随想</div>
+        </div>
+        <span class="nav-arrow">›</span>
+      </a>
+      <a href="dushu/index.html" class="nav-link">
+        <div class="nav-icon blue">📖</div>
+        <div class="nav-text">
+          <div class="nav-title">读书笔记</div>
+          <div class="nav-desc">76 条摘录</div>
+        </div>
+        <span class="nav-arrow">›</span>
+      </a>
+    </nav>
+  </div>
+</body>
+</html>

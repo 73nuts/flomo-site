@@ -1,0 +1,236 @@
+/* Laws of UX inspired - Minimal, Clean, Typography-focused */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&display=swap');
+
+:root {
+  --color-bg: #fafafa;
+  --color-surface: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-secondary: #666666;
+  --color-text-muted: #999999;
+  --color-border: #e5e5e5;
+  --color-accent: #2d2d2d;
+  --font-serif: 'Noto Serif SC', 'Songti SC', Georgia, serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-serif);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.8;
+  min-height: 100vh;
+}
+
+/* ========== Header ========== */
+header {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 60px 24px 40px;
+  text-align: center;
+}
+
+header .logo {
+  display: none;
+}
+
+header .top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar-link {
+  display: block;
+  margin-bottom: 24px;
+  transition: transform 0.3s ease;
+}
+
+.avatar-link:hover {
+  transform: scale(1.05);
+}
+
+.header-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+header .top .user {
+  padding: 0;
+}
+
+header .top .user .name {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--color-text);
+  letter-spacing: 0.02em;
+}
+
+header .top .user .date {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-top: 8px;
+  font-weight: 400;
+}
+
+/* Hide filter */
+header .top .filter {
+  display: none;
+}
+
+/* ========== Memos Container ========== */
+.memos {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 24px 100px;
+}
+
+/* ========== Memo Card - Minimal Style ========== */
+.memo {
+  position: relative;
+  padding: 32px 0;
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.memo:first-child {
+  padding-top: 0;
+}
+
+.memo:last-child {
+  border-bottom: none;
+}
+
+.memo:hover {
+  box-shadow: none;
+}
+
+/* Time - subtle, top right or inline */
+.memo .time {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 16px;
+  letter-spacing: 0.02em;
+}
+
+/* Content */
+.memo .content {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  color: var(--color-text);
+  line-height: 1.9;
+}
+
+.memo .content p {
+  margin-bottom: 1em;
+  min-height: auto;
+}
+
+.memo .content p:last-child {
+  margin-bottom: 0;
+}
+
+
+/* Lists */
+.memo .content ul,
+.memo .content ol {
+  padding-left: 1.2em;
+  margin: 0.8em 0;
+}
+
+.memo .content li {
+  line-height: 1.9;
+  margin-bottom: 0.4em;
+}
+
+/* Images */
+.memo .files {
+  margin-top: 20px;
+}
+
+.memo .files img {
+  max-width: 100%;
+  border-radius: 8px;
+  border: none;
+  margin: 8px 0;
+}
+
+/* Audio */
+.audio-player {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.audio-player audio {
+  width: 100%;
+}
+
+.audio-player__content {
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px solid var(--color-border);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 480px) {
+  header {
+    padding: 48px 20px 32px;
+  }
+
+  header .top .user .name {
+    font-size: 24px;
+  }
+
+  .memos {
+    padding: 0 20px 80px;
+  }
+
+  .memo {
+    padding: 28px 0;
+  }
+
+  .memo .content {
+    font-size: 16px;
+  }
+}
+
+/* ========== Utilities ========== */
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: #e0e0e0;
+  color: var(--color-text);
+}
+
+/* Custom select - hidden */
+.custom-select,
+.select-selected,
+.select-items {
+  display: none !important;
+}
