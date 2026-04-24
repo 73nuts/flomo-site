@@ -42,7 +42,7 @@
   {#if isMidnight}
     <span class="late-night">
       <span class="moon" aria-hidden="true">🌙</span>
-      <span>夜 深 了，快 去 睡 吧</span>
+      <span>这 么 晚 还 想 我，快 去 睡 吧</span>
     </span>
   {/if}
 </div>

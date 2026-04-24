@@ -86,6 +86,9 @@ const counts = Object.fromEntries(
         layer.appendChild(p);
         (function (node) { setTimeout(function () { node.remove(); }, 1700); })(p);
       }
+      setTimeout(function () {
+        if (layer && !layer.firstChild) layer.remove();
+      }, 1900);
     }
     bind();
     document.addEventListener('astro:page-load', bind);

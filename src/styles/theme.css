@@ -475,25 +475,6 @@ button {
   letter-spacing: 0.05em;
 }
 .paper .from::before { content: '— '; }
-.paper .end-mark {
-  text-align: center;
-  margin-top: 36px;
-  font-family: var(--brush);
-  font-size: 13px;
-  color: var(--accent);
-  opacity: 0.55;
-  letter-spacing: 0.4em;
-}
-.paper .end-mark::before,
-.paper .end-mark::after {
-  content: '';
-  display: inline-block;
-  width: 14px;
-  height: 1px;
-  background: rgba(var(--accent-rgb), 0.35);
-  vertical-align: middle;
-  margin: 0 10px;
-}
 
 @keyframes rise {
   from { transform: translateY(10px); opacity: 0; }
