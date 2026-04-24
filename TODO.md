@@ -117,15 +117,19 @@ if (e.key === 'ArrowLeft' && prevHref) navigate(prevHref);
 
 ## 运维
 
-### [P1] 域名解析
+### [DONE 2026-04-24] 域名解析
 
-用户计划近期购买域名。见 `README.md` → [绑定自定义域名（规划）](./README.md#绑定自定义域名规划) 章节的 4 步指引。
+已上线 `https://ayalife.cc`：
+- Dynadot 注册域名 → NS 改到 Cloudflare（mike/sue.ns.cloudflare.com）
+- CF DNS 配 4 条 A @ → GitHub Pages IPs + 1 条 CNAME www → 73nuts.github.io（Proxied）
+- CF SSL 模式 **Flexible**（Full 会 404，因 GitHub Pages 尚未给该域签 Let's Encrypt 证书）
+- GitHub Pages Custom domain = ayalife.cc；`https_enforced: false`（由 CF 负责 HTTPS）
+- `astro.config.mjs` site=`https://ayalife.cc`, base=`/`
+- `public/CNAME` = `ayalife.cc`
 
-操作顺序：
-1. 买域名
-2. DNS 配 CNAME → 73nuts.github.io
-3. 仓库 Settings → Pages → Custom domain
-4. 改 `astro.config.mjs` 的 `site` 和 `base` → push
+**仍未做**：
+- CF SSL/TLS → Edge Certificates 打开 "Always Use HTTPS" + "Automatic HTTPS Rewrites"
+- 长期上可切回 Full：先临时把 DNS 改成 DNS only（灰云）让 GH 签证书，再切回 Proxied
 
 ---
 
