@@ -2,7 +2,7 @@
 import Base from '~/layouts/Base.astro';
 import MemoCard from '~/components/MemoCard.astro';
 import MonthSeparator from '~/components/MonthSeparator.astro';
-import SkyBanner from '~/components/islands/SkyBanner.svelte';
+import SkyBanner from '~/components/SkyBanner.astro';
 import VisitCounter from '~/components/islands/VisitCounter.svelte';
 import { TABS, TAB_BY_ID, type TabId } from '~/lib/tabs';
 import { monthKey } from '~/lib/date';
@@ -41,7 +41,7 @@ const title = `${tab.name} · 阿鸭的随笔`;
 
 <Base title={title} accent={tab.accent} accentRgb={tab.accentRgb}>
   <main class="screen fade-in">
-    <SkyBanner client:only="svelte" />
+    <SkyBanner />
 
     <header class="topbar">
       <a class="back" href={url('')}>返回</a>
@@ -60,7 +60,7 @@ const title = `${tab.name} · 阿鸭的随笔`;
                 id={m.data.id}
                 date={m.data.date}
                 body={m.body ?? ''}
-                tags={m.data.tags ?? []}
+                from={m.data.from}
                 title={m.data.title}
               />
             ))}

@@ -45,24 +45,47 @@ function loadDeleted(): Set<string> {
   return out;
 }
 
-/** 去掉 #tag 段并提取 tag 列表 */
-function extractTags(contentEl: HTMLElement): string[] {
-  const tags: string[] = [];
+/**
+ * 从正文中把 flomo 自动插入的 #tab名 标签段清理掉。
+ * 我们不把 tag 写入 frontmatter —— 用户不希望列表/阅读页右上角显示 tab 名自动 tag。
+ */
+function stripTagParagraphs(contentEl: HTMLElement): void {
   for (const p of contentEl.querySelectorAll('p')) {
     const txt = p.text.trim();
     if (txt && txt.split(/\s+/).every((w) => w.startsWith('#'))) {
-      for (const w of txt.split(/\s+/)) tags.push(w.slice(1));
       p.remove();
     }
   }
-  const inline = contentEl.text.match(/#([^\s#<]+)/g);
-  if (inline) {
-    for (const t of inline) {
-      const name = t.slice(1);
-      if (!tags.includes(name)) tags.push(name);
-    }
+}
+
+/**
+ * 读书笔记专用：从正文尾部抽出作者/书名归属，作为 from 字段。
+ * 匹配模式（按优先级）：
+ *   1. 独立段 "- 作者" / "- 作者《书》" / "- 《书》作者"
+ *   2. 段尾 "xxx。 - 作者"（句末标点 + 空格 + 短横 + 归属）
+ * 返回清理后的 body 与抽出的 from；匹配不到则保持原样。
+ */
+function extractFromAttribution(body: Body): { body: Body; from?: string } {
+  if (typeof body !== 'string') return { body };
+  const paras = body.split(/\n\n+/);
+  if (!paras.length) return { body };
+
+  const last = paras[paras.length - 1]!;
+  // 模式 1：整段就是 "- XXX"
+  const standalone = last.match(/^\s*-\s+(.{2,80})\s*$/);
+  if (standalone && !/[。！？]/.test(standalone[1]!)) {
+    return {
+      body: paras.slice(0, -1).join('\n\n'),
+      from: standalone[1]!.trim(),
+    };
   }
-  return tags;
+  // 模式 2：段末句末标点 + 空格 + "- XXX"
+  const tail = last.match(/^([\s\S]*?[。！？!?""''」])\s+-\s+(.{2,80})\s*$/);
+  if (tail && !/[。！？]/.test(tail[2]!)) {
+    paras[paras.length - 1] = tail[1]!.trim();
+    return { body: paras.join('\n\n'), from: tail[2]!.trim() };
+  }
+  return { body };
 }
 
 /** .content 节点 → 纯文本 markdown body */
@@ -127,7 +150,6 @@ function toMarkdown(meta: {
   tab: string;
   date: string;
   time?: string;
-  tags: string[];
   from?: string;
   body: Body;
 }): string {
@@ -137,7 +159,6 @@ function toMarkdown(meta: {
     `date: "${meta.date}"`,
   ];
   if (meta.time) fmLines.push(`time: "${meta.time}"`);
-  if (meta.tags.length) fmLines.push(`tags: [${meta.tags.map((t) => JSON.stringify(t)).join(', ')}]`);
   if (meta.from) fmLines.push(`from: ${JSON.stringify(meta.from)}`);
   fmLines.push('source: "flomo"');
 
@@ -209,12 +230,20 @@ async function syncTab(tab: (typeof TABS)[number], deleted: Set<string>) {
       continue;
     }
 
-    const tags = extractTags(contentEl);
-    const body = nodeToBody(contentEl);
+    stripTagParagraphs(contentEl);
+    let body: Body = nodeToBody(contentEl);
     if (typeof body === 'string' && !body) continue;
     if (typeof body !== 'string' && !body.items.length) continue;
 
-    const md = toMarkdown({ id, tab: tab.id, date: stamp.date, time: stamp.time, tags, body });
+    // 读书笔记：抽出正文尾部的作者/书名归属，放到 from 字段
+    let from: string | undefined;
+    if (tab.id === 'ds') {
+      const extracted = extractFromAttribution(body);
+      body = extracted.body;
+      from = extracted.from;
+    }
+
+    const md = toMarkdown({ id, tab: tab.id, date: stamp.date, time: stamp.time, from, body });
     await writeFile(join(outDir, `${id}.md`), md, 'utf8');
     written++;
   }

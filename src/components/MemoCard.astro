@@ -9,28 +9,20 @@ interface Props {
   id: string;
   date: string;
   body: string;
-  tags: string[];
+  /** 右上角归属（作者 / 书名）—— 仅读书笔记渲染。其他 tab 不渲染。 */
+  from?: string;
   title?: string;
 }
 
-const { tabId, id, date, body, tags, title } = Astro.props;
+const { tabId, id, date, body, from, title } = Astro.props;
 const href = url(`${tabId}/${id}`);
-// 长文阈值：中英混合按字符数 200 粗略估计
 const isLong = body.length > 200 || !!title;
 ---
 
 <a class="card" href={href}>
   <div class="meta">
     <span class="ts">{fmtDate(date)}</span>
-    {
-      tags.length > 0 && (
-        <span class="tags">
-          {tags.map((t) => (
-            <span class="tag">{t}</span>
-          ))}
-        </span>
-      )
-    }
+    {from && <span class="from-inline">{from}</span>}
   </div>
   {title && <h2 class="card-title">{title}</h2>}
   {
@@ -54,10 +46,16 @@ const isLong = body.length > 200 || !!title;
     gap: 12px;
     margin-bottom: 10px;
   }
-  .tags {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
+  .from-inline {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    text-align: right;
+    max-width: 55%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .card-title {
     font-family: var(--brush);

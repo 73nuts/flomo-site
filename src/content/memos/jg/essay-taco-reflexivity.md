@@ -5,7 +5,6 @@ date: "2026-04-24"
 time: "09:41"
 title: "TACO 交易的自反性悖论"
 source: "vault"
-tags: ["长文", "观察"]
 ---
 
 ## TACO = Trump Always Chickens Out

@@ -61,22 +61,13 @@ const closeHref = url(tabParam);
       <article class="paper">
         <div class="meta">
           <span class="ts">{fmtDate(entry.data.date)}</span>
-          {
-            entry.data.tags?.length > 0 && (
-              <span class="tags">
-                {entry.data.tags.map((t) => (
-                  <span class="tag">{t}</span>
-                ))}
-              </span>
-            )
-          }
+          {entry.data.from && <span class="from-inline">{entry.data.from}</span>}
         </div>
         {entry.data.title && <h1 class="essay-title">{entry.data.title}</h1>}
         <div class="divider"></div>
         <div class="body">
           <Content />
         </div>
-        {entry.data.from && <div class="from">{entry.data.from}</div>}
         <div class="end-mark">终</div>
         <span class="fold"></span>
       </article>
@@ -87,10 +78,16 @@ const closeHref = url(tabParam);
 </Base>
 
 <style>
-  .tags {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
+  .from-inline {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    text-align: right;
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .essay-title {
     font-family: var(--brush);
