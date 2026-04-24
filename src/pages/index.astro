@@ -30,100 +30,98 @@ const counts = Object.fromEntries(
   </main>
 </Base>
 
-<script>
-  import confetti from 'canvas-confetti';
-
-  function bind() {
-    const btn = document.getElementById('avatar-egg') as HTMLElement | null;
-    if (!btn || btn.dataset.eggBound) return;
-    btn.dataset.eggBound = '1';
-    let count = 0;
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    btn.addEventListener('click', () => {
-      count++;
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(() => { count = 0; }, 2000);
-      btn.animate(
-        [
-          { transform: 'scale(1)' },
-          { transform: 'scale(1.15) rotate(-4deg)' },
-          { transform: 'scale(1)' },
-        ],
-        { duration: 260, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
-      );
-      if (count >= 10) {
-        burst(btn);
-        count = 0;
+<script is:inline>
+  (function () {
+    function bind() {
+      var btn = document.getElementById('avatar-egg');
+      if (!btn || btn.dataset.eggBound) return;
+      btn.dataset.eggBound = '1';
+      var count = 0;
+      var timer = null;
+      btn.addEventListener('click', function () {
+        count++;
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(function () { count = 0; }, 2000);
+        btn.animate(
+          [
+            { transform: 'scale(1)' },
+            { transform: 'scale(1.15) rotate(-4deg)' },
+            { transform: 'scale(1)' },
+          ],
+          { duration: 260, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
+        );
+        if (count >= 10) {
+          burst(btn);
+          count = 0;
+        }
+      });
+    }
+    function spawn(cx, cy, N, minDist, maxDist, sizeMin, sizeMax, layer) {
+      var glyphs = ['♥', '✦', '✧', '❀', '❁', '✿', '❤'];
+      var colors = ['#e88ca0', '#c9a063', '#8a9aa8', '#c77f8a', '#b88660', '#e3a87a'];
+      for (var i = 0; i < N; i++) {
+        var p = document.createElement('span');
+        p.className = 'fx-particle';
+        p.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+        p.style.color = colors[Math.floor(Math.random() * colors.length)];
+        var angle = (Math.PI * 2 * i) / N + (Math.random() - 0.5) * 0.3;
+        var dist = minDist + Math.random() * (maxDist - minDist);
+        p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+        p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+        p.style.setProperty('--rot', (Math.random() - 0.5) * 360 + 'deg');
+        p.style.fontSize = sizeMin + Math.random() * (sizeMax - sizeMin) + 'px';
+        p.style.left = cx + 'px';
+        p.style.top = cy + 'px';
+        p.style.animationDelay = Math.random() * 0.1 + 's';
+        p.style.animationDuration = 1200 + Math.random() * 500 + 'ms';
+        layer.appendChild(p);
+        (function (node) { setTimeout(function () { node.remove(); }, 1800); })(p);
       }
-    });
-  }
-
-  function burst(el: HTMLElement) {
-    const rect = el.getBoundingClientRect();
-    const x = (rect.left + rect.width / 2) / window.innerWidth;
-    const y = (rect.top + rect.height / 2) / window.innerHeight;
-    const colors = ['#e88ca0', '#c9a063', '#8a9aa8', '#c77f8a', '#b88660', '#e3a87a', '#d4a5b8'];
-
-    const heart = confetti.shapeFromText({ text: '♥', scalar: 2.2 });
-    const sparkle = confetti.shapeFromText({ text: '✦', scalar: 2 });
-    const flower = confetti.shapeFromText({ text: '✿', scalar: 2.2 });
-    const bloom = confetti.shapeFromText({ text: '❀', scalar: 2 });
-    const shapes = [heart, sparkle, flower, bloom, heart];
-
-    // 主炸：360° 扩散 + 中高速，覆盖最广
-    confetti({
-      particleCount: 70,
-      spread: 360,
-      startVelocity: 38,
-      origin: { x, y },
-      shapes,
-      colors,
-      scalar: 1.1,
-      gravity: 0.55,
-      ticks: 180,
-      drift: 0,
-    });
-
-    // 侧炸 1：左上方窄束
-    setTimeout(() => {
-      confetti({
-        particleCount: 35,
-        angle: 120,
-        spread: 55,
-        startVelocity: 50,
-        origin: { x, y },
-        shapes: [heart, flower],
-        colors,
-        scalar: 1.3,
-        gravity: 0.7,
-        ticks: 160,
-      });
-    }, 120);
-
-    // 侧炸 2：右上方窄束
-    setTimeout(() => {
-      confetti({
-        particleCount: 35,
-        angle: 60,
-        spread: 55,
-        startVelocity: 50,
-        origin: { x, y },
-        shapes: [heart, bloom],
-        colors,
-        scalar: 1.3,
-        gravity: 0.7,
-        ticks: 160,
-      });
-    }, 180);
-  }
-
-  bind();
-  document.addEventListener('astro:page-load', bind);
+    }
+    function burst(el) {
+      var rect = el.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var cy = rect.top + rect.height / 2;
+      var layer = document.getElementById('fireworks-layer');
+      if (!layer) {
+        layer = document.createElement('div');
+        layer.id = 'fireworks-layer';
+        document.body.appendChild(layer);
+      }
+      var maxSpan = Math.min(window.innerWidth, window.innerHeight) * 0.42;
+      // 主波：45 颗，铺开到 maxSpan
+      spawn(cx, cy, 45, 120, maxSpan, 18, 34, layer);
+      // 200ms 后补一小轮：中心附近 12 颗小粒子，营造纵深
+      setTimeout(function () {
+        spawn(cx, cy, 12, 40, 110, 12, 22, layer);
+      }, 200);
+      setTimeout(function () {
+        if (layer && !layer.firstChild) layer.remove();
+      }, 2200);
+    }
+    bind();
+    document.addEventListener('astro:page-load', bind);
+  })();
 </script>
 
 <style is:global>
-  canvas[style*="position: fixed"][style*="z-index"] {
+  #fireworks-layer {
+    position: fixed;
+    inset: 0;
     pointer-events: none;
+    z-index: 9999;
+  }
+  .fx-particle {
+    position: fixed;
+    transform: translate3d(-50%, -50%, 0);
+    opacity: 0;
+    animation: fxFly 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    will-change: transform, opacity;
+  }
+  @keyframes fxFly {
+    0%   { opacity: 0; transform: translate3d(-50%, -50%, 0) scale(0.4) rotate(0); }
+    15%  { opacity: 1; transform: translate3d(calc(-50% + var(--tx) * 0.3), calc(-50% + var(--ty) * 0.3), 0) scale(1.05) rotate(calc(var(--rot) * 0.3)); }
+    100% { opacity: 0; transform: translate3d(calc(-50% + var(--tx)), calc(-50% + var(--ty) + 30px), 0) scale(0.6) rotate(var(--rot)); }
   }
 </style>
 

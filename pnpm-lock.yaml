@@ -20,15 +20,9 @@ importers:
       '@fontsource/zcool-xiaowei':
         specifier: ^5.1.0
         version: 5.2.8
-      '@types/canvas-confetti':
-        specifier: ^1.9.0
-        version: 1.9.0
       astro:
         specifier: ^5.1.0
         version: 5.18.1(@types/node@22.19.17)(rollup@4.60.2)(typescript@5.9.3)(yaml@2.8.3)
-      canvas-confetti:
-        specifier: ^1.9.4
-        version: 1.9.4
       svelte:
         specifier: ^5.15.0
         version: 5.55.5
@@ -820,9 +814,6 @@ packages:
       svelte: ^5.0.0
       vite: ^6.0.0
 
-  '@types/canvas-confetti@1.9.0':
-    resolution: {integrity: sha512-aBGj/dULrimR1XDZLtG9JwxX1b4HPRF6CX9Yfwh3NvstZEm1ZL7RBnel4keCPSqs1ANRu1u2Aoz9R+VmtjYuTg==}
-
   '@types/debug@4.1.13':
     resolution: {integrity: sha512-KSVgmQmzMwPlmtljOomayoR89W4FynCAi3E8PPs7vmDVPe84hT+vGPKkJfThkmXs0x0jAaa9U8uW8bbfyS2fWw==}
 
@@ -957,9 +948,6 @@ packages:
   camelcase@8.0.0:
     resolution: {integrity: sha512-8WB3Jcas3swSvjIeA2yvCJ+Miyz5l1ZmB6HFb9R1317dt9LCQoswg/BGrmAmkWVEszSrrg4RwmO46qIm2OEnSA==}
     engines: {node: '>=16'}
-
-  canvas-confetti@1.9.4:
-    resolution: {integrity: sha512-yxQbJkAVrFXWNbTUjPqjF7G+g6pDotOUHGbkZq2NELZUMDpiJ85rIEazVb8GTaAptNW2miJAXbs1BtioA251Pw==}
 
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
@@ -2680,8 +2668,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@types/canvas-confetti@1.9.0': {}
-
   '@types/debug@4.1.13':
     dependencies:
       '@types/ms': 2.1.0
@@ -2924,8 +2910,6 @@ snapshots:
       wrap-ansi: 9.0.2
 
   camelcase@8.0.0: {}
-
-  canvas-confetti@1.9.4: {}
 
   ccount@2.0.1: {}
 
