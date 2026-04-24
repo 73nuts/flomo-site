@@ -2,11 +2,14 @@
 /**
  * flomo 原始导出 HTML → Astro Content Collection markdown。
  *
- *   SYNC_DIR/<tab>/阿鸭的笔记.html     （flomo 手动导出）
+ *   SYNC_DIR/<tab>/阿鸭的笔记.html       （flomo 手动导出）
  *        ↓
- *   src/content/memos/<tabId>/<tabId><N>.md  （Astro 内容源）
+ *   src/content/memos/<tabId>/<id>.md   （Astro 内容源）
  *
- * 每次运行会清空 <tabId> 目录后重新生成，保持严格一致。
+ * id 来自 flomo 原始时间戳：yyyymmdd-hhmmss（如 20260116-182134）。
+ * 稳定、URL 友好、跨次导出不 shift。
+ *
+ * 删除保护：data/deleted.txt 里登记的 <tab>/<id> 不会生成 md。
  *
  * 用法：
  *   pnpm sync                            # 默认读 ~/Documents/flomo-sync
@@ -21,6 +24,7 @@ import { TABS } from '../src/lib/tabs.ts';
 
 const SYNC_DIR = process.env.FLOMO_SYNC_DIR ?? join(homedir(), 'Documents', 'flomo-sync');
 const OUT_DIR = join(process.cwd(), 'src', 'content', 'memos');
+const DELETED_FILE = join(process.cwd(), 'data', 'deleted.txt');
 
 type Body = string | { kind: 'list'; items: string[] };
 
@@ -29,18 +33,28 @@ interface RawMemo {
   contentEl: HTMLElement;
 }
 
+function loadDeleted(): Set<string> {
+  if (!existsSync(DELETED_FILE)) return new Set();
+  const lines = readFileSync(DELETED_FILE, 'utf8').split('\n');
+  const out = new Set<string>();
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) continue;
+    out.add(line);
+  }
+  return out;
+}
+
 /** 去掉 #tag 段并提取 tag 列表 */
 function extractTags(contentEl: HTMLElement): string[] {
   const tags: string[] = [];
   for (const p of contentEl.querySelectorAll('p')) {
     const txt = p.text.trim();
-    // 整段都是 #tag #tag2 的（flomo 自动插入的标签段）
     if (txt && txt.split(/\s+/).every((w) => w.startsWith('#'))) {
       for (const w of txt.split(/\s+/)) tags.push(w.slice(1));
       p.remove();
     }
   }
-  // 行内 #tag（保留文字，只提取 tag）
   const inline = contentEl.text.match(/#([^\s#<]+)/g);
   if (inline) {
     for (const t of inline) {
@@ -53,14 +67,12 @@ function extractTags(contentEl: HTMLElement): string[] {
 
 /** .content 节点 → 纯文本 markdown body */
 function nodeToBody(contentEl: HTMLElement): Body {
-  // 纯列表
   const children = contentEl.childNodes.filter((n) => 'tagName' in n) as HTMLElement[];
   if (children.length === 1 && children[0]?.tagName === 'UL') {
     const items = children[0].querySelectorAll('li').map((li) => li.text.trim()).filter(Boolean);
     if (items.length) return { kind: 'list', items };
   }
 
-  // 段落
   const paras: string[] = [];
   for (const p of contentEl.querySelectorAll('p')) {
     const t = p.text.trim();
@@ -71,11 +83,31 @@ function nodeToBody(contentEl: HTMLElement): Body {
   return paras.join('\n\n');
 }
 
-/** flomo time 字段如 "2026-01-16 08:12:34" → { date, time } */
-function splitTime(raw: string): { date: string; time?: string } {
-  const m = raw.trim().match(/^(\d{4}-\d{2}-\d{2})(?:\s+(\d{2}:\d{2}))?/);
-  if (!m) return { date: raw };
-  return { date: m[1]!, time: m[2] };
+/**
+ * flomo time 字段如 "2026-01-16 08:12:34" → { date, time, id }
+ * id 格式 yyyymmdd-hhmmss，稳定、排序友好、URL 友好。
+ */
+function parseStamp(raw: string): { date: string; time: string; id: string } | null {
+  const m = raw.trim().match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+  if (!m) {
+    // 容忍 flomo 偶发不带秒
+    const m2 = raw.trim().match(/^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2}))?/);
+    if (!m2) return null;
+    const date = `${m2[1]}-${m2[2]}-${m2[3]}`;
+    const hh = m2[4] ?? '00';
+    const mm = m2[5] ?? '00';
+    return {
+      date,
+      time: `${hh}:${mm}`,
+      id: `${m2[1]}${m2[2]}${m2[3]}-${hh}${mm}00`,
+    };
+  }
+  const date = `${m[1]}-${m[2]}-${m[3]}`;
+  return {
+    date,
+    time: `${m[4]}:${m[5]}`,
+    id: `${m[1]}${m[2]}${m[3]}-${m[4]}${m[5]}${m[6]}`,
+  };
 }
 
 function extractMemos(html: string): RawMemo[] {
@@ -109,48 +141,62 @@ function toMarkdown(meta: {
   if (meta.from) fmLines.push(`from: ${JSON.stringify(meta.from)}`);
 
   const fm = ['---', ...fmLines, '---', ''].join('\n');
-
   const body =
     typeof meta.body === 'string'
       ? meta.body
       : meta.body.items.map((it) => `- ${it}`).join('\n');
-
   return `${fm}${body}\n`;
 }
 
-async function syncTab(tab: (typeof TABS)[number]) {
+async function syncTab(tab: (typeof TABS)[number], deleted: Set<string>) {
   const src = join(SYNC_DIR, tab.dir, '阿鸭的笔记.html');
   const outDir = join(OUT_DIR, tab.id);
 
   if (!existsSync(src)) {
     console.warn(`[sync] ${tab.id} ← 源文件不存在：${src} —— 跳过`);
-    return { tab: tab.id, count: 0 };
+    return { tab: tab.id, count: 0, skipped: 0 };
   }
 
   const html = readFileSync(src, 'utf8');
   const raw = extractMemos(html);
 
-  // 清空 + 重建目录（严格一致性）
   await rm(outDir, { recursive: true, force: true });
   await mkdir(outDir, { recursive: true });
 
+  const seen = new Map<string, number>(); // id → 出现次数（处理极罕见的同秒冲突）
   let written = 0;
-  for (let i = 0; i < raw.length; i++) {
-    const { time, contentEl } = raw[i]!;
-    const { date, time: hm } = splitTime(time);
+  let skipped = 0;
+
+  for (const { time, contentEl } of raw) {
+    const stamp = parseStamp(time);
+    if (!stamp) continue;
+
+    // 同秒冲突：追加 -02 / -03 …
+    let id = stamp.id;
+    const n = (seen.get(stamp.id) ?? 0) + 1;
+    seen.set(stamp.id, n);
+    if (n > 1) id = `${stamp.id}-${String(n).padStart(2, '0')}`;
+
+    // 删除保护
+    const key = `${tab.id}/${id}`;
+    if (deleted.has(key)) {
+      skipped++;
+      continue;
+    }
+
     const tags = extractTags(contentEl);
     const body = nodeToBody(contentEl);
     if (typeof body === 'string' && !body) continue;
     if (typeof body !== 'string' && !body.items.length) continue;
 
-    const id = `${tab.id}${i}`;
-    const md = toMarkdown({ id, tab: tab.id, date, time: hm, tags, body });
+    const md = toMarkdown({ id, tab: tab.id, date: stamp.date, time: stamp.time, tags, body });
     await writeFile(join(outDir, `${id}.md`), md, 'utf8');
     written++;
   }
 
-  console.log(`[sync] ${tab.id} ← ${tab.dir}: ${written} 条`);
-  return { tab: tab.id, count: written };
+  const suffix = skipped > 0 ? `（跳过 ${skipped} 条永久删除项）` : '';
+  console.log(`[sync] ${tab.id} ← ${tab.dir}: ${written} 条${suffix}`);
+  return { tab: tab.id, count: written, skipped };
 }
 
 async function main() {
@@ -159,9 +205,13 @@ async function main() {
     console.error(`[sync] 同步目录不存在。设置 FLOMO_SYNC_DIR 或把 flomo 导出放到 ${SYNC_DIR}`);
     process.exit(1);
   }
-  const results = await Promise.all(TABS.map(syncTab));
+  const deleted = loadDeleted();
+  if (deleted.size > 0) console.log(`[sync] 载入 deleted.txt：${deleted.size} 条永久跳过`);
+
+  const results = await Promise.all(TABS.map((t) => syncTab(t, deleted)));
   const total = results.reduce((a, b) => a + b.count, 0);
-  console.log(`[sync] 完成：共 ${total} 条`);
+  const totalSkipped = results.reduce((a, b) => a + b.skipped, 0);
+  console.log(`[sync] 完成：生成 ${total} 条${totalSkipped > 0 ? `，跳过 ${totalSkipped} 条` : ''}`);
 }
 
 main().catch((e) => {
