@@ -1,5 +1,6 @@
 ---
 import { fmtDate } from '~/lib/date';
+import { url } from '~/lib/url';
 import MemoBody from './MemoBody.astro';
 import LongMemo from './islands/LongMemo.svelte';
 
@@ -12,7 +13,7 @@ interface Props {
 }
 
 const { tabId, id, date, body, tags } = Astro.props;
-const href = `/${tabId}/${id}`;
+const href = url(`${tabId}/${id}`);
 // 长文阈值：中英混合按字符数 200 粗略估计
 const isLong = body.length > 200;
 ---

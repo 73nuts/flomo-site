@@ -4,6 +4,7 @@ import MemoBody from '~/components/MemoBody.astro';
 import ReaderNav from '~/components/islands/ReaderNav.svelte';
 import { TABS, TAB_BY_ID, type TabId } from '~/lib/tabs';
 import { fmtDate } from '~/lib/date';
+import { url } from '~/lib/url';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -41,9 +42,9 @@ const { memo, prev, next, total, idx } = Astro.props as {
 };
 
 const title = `${memo.data.date} · ${tab.name}`;
-const prevHref = prev ? `/${tabParam}/${prev}` : null;
-const nextHref = next ? `/${tabParam}/${next}` : null;
-const closeHref = `/${tabParam}`;
+const prevHref = prev ? url(`${tabParam}/${prev}`) : null;
+const nextHref = next ? url(`${tabParam}/${next}`) : null;
+const closeHref = url(tabParam);
 ---
 
 <Base title={title} accent={tab.accent} accentRgb={tab.accentRgb}>

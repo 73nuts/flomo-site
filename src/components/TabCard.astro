@@ -1,5 +1,6 @@
 ---
 import type { Tab } from '~/lib/tabs';
+import { url } from '~/lib/url';
 
 interface Props {
   tab: Tab;
@@ -11,7 +12,7 @@ const { tab, count } = Astro.props;
 
 <a
   class="tab-card"
-  href={`/${tab.id}`}
+  href={url(tab.id)}
   style={`--accent: ${tab.accent}; --accent-rgb: ${tab.accentRgb};`}
 >
   <span class="tape"></span>

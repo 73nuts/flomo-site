@@ -6,6 +6,7 @@ import SkyBanner from '~/components/islands/SkyBanner.svelte';
 import VisitCounter from '~/components/islands/VisitCounter.svelte';
 import { TABS, TAB_BY_ID, type TabId } from '~/lib/tabs';
 import { monthKey } from '~/lib/date';
+import { url } from '~/lib/url';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -43,7 +44,7 @@ const title = `${tab.name} · 阿鸭的随笔`;
     <SkyBanner client:only="svelte" />
 
     <header class="topbar">
-      <a class="back" href="/">返回</a>
+      <a class="back" href={url('')}>返回</a>
       <h1 class="title">{tab.name.split('').join(' ')}</h1>
       <span class="cnt">{memos.length} 则</span>
     </header>
