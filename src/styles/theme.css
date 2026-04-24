@@ -168,17 +168,17 @@ button {
   transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
   display: block;
 }
-/* 10 档随机微倾斜 —— ±8° 范围内看起来自然，hover/active 扶正 */
-.card:nth-of-type(10n + 1) { transform: rotate(-5.3deg); }
-.card:nth-of-type(10n + 2) { transform: rotate( 3.7deg); }
-.card:nth-of-type(10n + 3) { transform: rotate(-2.1deg); }
-.card:nth-of-type(10n + 4) { transform: rotate( 6.4deg); }
-.card:nth-of-type(10n + 5) { transform: rotate(-7.2deg); }
-.card:nth-of-type(10n + 6) { transform: rotate( 1.5deg); }
-.card:nth-of-type(10n + 7) { transform: rotate(-4.1deg); }
-.card:nth-of-type(10n + 8) { transform: rotate( 5.8deg); }
-.card:nth-of-type(10n + 9) { transform: rotate(-3.5deg); }
-.card:nth-of-type(10n + 10){ transform: rotate( 2.9deg); }
+/* 10 档随机微倾斜 —— ±1.2° 范围，仅"纸张自然落下"错位感，不失控 */
+.card:nth-of-type(10n + 1) { transform: rotate(-0.8deg); }
+.card:nth-of-type(10n + 2) { transform: rotate( 0.5deg); }
+.card:nth-of-type(10n + 3) { transform: rotate(-0.3deg); }
+.card:nth-of-type(10n + 4) { transform: rotate( 1.1deg); }
+.card:nth-of-type(10n + 5) { transform: rotate(-1.2deg); }
+.card:nth-of-type(10n + 6) { transform: rotate( 0.2deg); }
+.card:nth-of-type(10n + 7) { transform: rotate(-0.6deg); }
+.card:nth-of-type(10n + 8) { transform: rotate( 0.9deg); }
+.card:nth-of-type(10n + 9) { transform: rotate(-0.4deg); }
+.card:nth-of-type(10n + 10){ transform: rotate( 0.7deg); }
 .card:hover {
   transform: translateY(-3px) rotate(0deg);
   box-shadow: var(--shadow-1);
