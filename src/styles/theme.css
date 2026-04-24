@@ -117,30 +117,22 @@ button {
   background: rgba(var(--accent-rgb, 138, 130, 114), 0.1);
 }
 
-/* 月份分隔符 —— 滚动时贴住顶栏下沿 */
+/* 月份分隔符 —— 滚动时贴住顶栏下沿，背景透明以贴合整体质感 */
 .month-sep {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 20px 10px;
-  margin-top: 14px;
+  padding: 10px 4px 8px;
+  margin-top: 18px;
   position: sticky;
   top: 54px;
   z-index: 12;
-  background: linear-gradient(
-    to bottom,
-    rgba(245, 241, 233, 0.98) 70%,
-    rgba(245, 241, 233, 0)
-  );
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: transparent;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 .month-sep:first-of-type {
   margin-top: 28px;
-  padding-top: 6px;
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 .month-sep .cn {
   font-family: var(--brush);
