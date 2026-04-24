@@ -27,7 +27,14 @@
   <span class="n">{n}</span>
   <span>次 来 看 阿 鸭</span>
   {#if n >= 10}
-    <span class="whisper">既 然 这 么 想 我，不 如 给 我 发 消 息 吧</span>
+    <span class="whisper">
+      <svg class="whisper-icon" viewBox="0 0 24 20" aria-hidden="true">
+        <path d="M3 5.5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v9c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2v-9z" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M3.5 6l8.5 6 8.5-6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M12 11c-.8-.9-2-1.4-2-2.3 0-.6.5-1.1 1.1-1.1.4 0 .7.2.9.5.2-.3.5-.5.9-.5.6 0 1.1.5 1.1 1.1 0 .9-1.2 1.4-2 2.3z" fill="currentColor"/>
+      </svg>
+      <span>既 然 这 么 想 我，不 如 给 我 发 消 息 吧</span>
+    </span>
   {/if}
 </div>
 
@@ -55,17 +62,25 @@
     margin: 2px 0;
   }
   .whisper {
-    margin-top: 10px;
-    font-family: var(--hand);
-    font-size: 13px;
+    margin-top: 14px;
+    font-family: var(--brush);
+    font-size: 12.5px;
     color: var(--accent, var(--muted));
-    letter-spacing: 0.18em;
-    opacity: 0.85;
-    transform: rotate(-1.5deg);
-    animation: whisperIn 0.9s 0.2s ease both;
+    letter-spacing: 0.22em;
+    opacity: 0.92;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    animation: whisperIn 0.9s 0.15s ease both;
+  }
+  .whisper-icon {
+    width: 16px;
+    height: 14px;
+    flex-shrink: 0;
+    opacity: 0.9;
   }
   @keyframes whisperIn {
-    from { opacity: 0; transform: rotate(-1.5deg) translateY(6px); }
-    to   { opacity: 0.85; transform: rotate(-1.5deg) translateY(0); }
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 0.92; transform: translateY(0); }
   }
 </style>
