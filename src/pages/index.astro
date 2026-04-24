@@ -15,7 +15,9 @@ const counts = Object.fromEntries(
 <Base title="阿鸭的随笔">
   <main class="entry" transition:name="screen" transition:animate="slide">
     <header class="brand">
-      <img class="avatar" src={url('avatar.jpg')} alt="阿鸭" />
+      <button class="avatar-btn" id="avatar-egg" type="button" aria-label="阿鸭">
+        <img class="avatar" src={url('avatar.jpg')} alt="阿鸭" />
+      </button>
       <h1 class="name">阿 鸭 的 随 笔</h1>
       <p class="bio">记录生活中的碎片与光亮</p>
     </header>
@@ -28,6 +30,89 @@ const counts = Object.fromEntries(
   </main>
 </Base>
 
+<script is:inline>
+  (function () {
+    function bind() {
+      var btn = document.getElementById('avatar-egg');
+      if (!btn || btn.dataset.eggBound) return;
+      btn.dataset.eggBound = '1';
+      var count = 0;
+      var timer = null;
+      btn.addEventListener('click', function () {
+        count++;
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(function () { count = 0; }, 2000);
+        btn.animate(
+          [
+            { transform: 'scale(1)' },
+            { transform: 'scale(1.15) rotate(-4deg)' },
+            { transform: 'scale(1)' },
+          ],
+          { duration: 260, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
+        );
+        if (count >= 10) {
+          burst(btn);
+          count = 0;
+        }
+      });
+    }
+    function burst(el) {
+      var rect = el.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var cy = rect.top + rect.height / 2;
+      var layer = document.getElementById('fireworks-layer');
+      if (!layer) {
+        layer = document.createElement('div');
+        layer.id = 'fireworks-layer';
+        document.body.appendChild(layer);
+      }
+      var glyphs = ['♥', '✦', '✧', '❀', '❁', '✿', '❤'];
+      var colors = ['#e88ca0', '#c9a063', '#8a9aa8', '#c77f8a', '#b88660', '#e3a87a'];
+      var N = 28;
+      for (var i = 0; i < N; i++) {
+        var p = document.createElement('span');
+        p.className = 'fx-particle';
+        p.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+        p.style.color = colors[Math.floor(Math.random() * colors.length)];
+        var angle = (Math.PI * 2 * i) / N + (Math.random() - 0.5) * 0.3;
+        var dist = 90 + Math.random() * 90;
+        p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+        p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+        p.style.setProperty('--rot', (Math.random() - 0.5) * 360 + 'deg');
+        p.style.fontSize = 12 + Math.random() * 12 + 'px';
+        p.style.left = cx + 'px';
+        p.style.top = cy + 'px';
+        p.style.animationDelay = Math.random() * 0.08 + 's';
+        layer.appendChild(p);
+        (function (node) { setTimeout(function () { node.remove(); }, 1700); })(p);
+      }
+    }
+    bind();
+    document.addEventListener('astro:page-load', bind);
+  })();
+</script>
+
+<style is:global>
+  #fireworks-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+  }
+  .fx-particle {
+    position: fixed;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    animation: fxFly 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    will-change: transform, opacity;
+  }
+  @keyframes fxFly {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(0); }
+    15%  { opacity: 1; transform: translate(calc(-50% + var(--tx) * 0.3), calc(-50% + var(--ty) * 0.3)) scale(1.05) rotate(calc(var(--rot) * 0.3)); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty) + 30px)) scale(0.6) rotate(var(--rot)); }
+  }
+</style>
+
 <style>
   .entry {
     min-height: 100vh;
@@ -39,13 +124,25 @@ const counts = Object.fromEntries(
   .brand {
     text-align: center;
   }
+  .avatar-btn {
+    display: inline-block;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 50%;
+    margin-bottom: 14px;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s ease;
+  }
+  .avatar-btn:active { transform: scale(0.96); }
   .avatar {
+    display: block;
     width: 64px;
     height: 64px;
     border-radius: 50%;
     object-fit: cover;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    margin-bottom: 14px;
   }
   .name {
     font-family: var(--brush);

@@ -1,6 +1,7 @@
 ---
 import Base from '~/layouts/Base.astro';
 import ReaderNav from '~/components/islands/ReaderNav.svelte';
+import EndMark from '~/components/islands/EndMark.svelte';
 import DesktopSidebar from '~/components/DesktopSidebar.astro';
 import { TABS, TAB_BY_ID, type TabId } from '~/lib/tabs';
 import { fmtDate } from '~/lib/date';
@@ -71,7 +72,7 @@ const closeHref = url(tabParam);
           <Content />
         </div>
         {entry.data.from && <div class="from-bottom">— {entry.data.from}</div>}
-        <div class="end-mark">终</div>
+        <EndMark client:load />
         <span class="fold"></span>
       </article>
 
