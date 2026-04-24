@@ -30,13 +30,11 @@
   <span>次 来 看 阿 鸭</span>
   {#if n >= 10}
     <span class="whisper">
-      <svg class="whisper-icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 21s-7-4.5-9-9.5C1.5 7 5 4 8 4c1.8 0 3.2.8 4 2 .8-1.2 2.2-2 4-2 3 0 6.5 3 5 7.5-2 5-9 9.5-9 9.5z" fill="currentColor"/>
+      <svg class="whisper-icon" viewBox="0 0 24 20" aria-hidden="true">
+        <path d="M3 5.5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v9c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2v-9z" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M3.5 6l8.5 6 8.5-6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
       </svg>
       <span>既 然 这 么 想 我，不 如 给 我 发 消 息 吧</span>
-      <svg class="whisper-icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 21s-7-4.5-9-9.5C1.5 7 5 4 8 4c1.8 0 3.2.8 4 2 .8-1.2 2.2-2 4-2 3 0 6.5 3 5 7.5-2 5-9 9.5-9 9.5z" fill="currentColor"/>
-      </svg>
     </span>
   {/if}
   {#if isMidnight}
@@ -83,12 +81,10 @@
     animation: whisperIn 0.9s 0.15s ease both;
   }
   .whisper-icon {
-    width: 13px;
-    height: 13px;
+    width: 16px;
+    height: 14px;
     flex-shrink: 0;
-    opacity: 0.85;
-    display: inline-block;
-    vertical-align: -2px;
+    opacity: 0.9;
   }
   @keyframes whisperIn {
     from { opacity: 0; transform: translateY(6px); }
