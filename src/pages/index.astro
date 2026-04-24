@@ -66,29 +66,45 @@ const counts = Object.fromEntries(
         layer.id = 'fireworks-layer';
         document.body.appendChild(layer);
       }
-      var glyphs = ['♥', '✦', '✧', '❀', '❁', '✿', '❤'];
-      var colors = ['#e88ca0', '#c9a063', '#8a9aa8', '#c77f8a', '#b88660', '#e3a87a'];
-      var N = 28;
-      for (var i = 0; i < N; i++) {
-        var p = document.createElement('span');
-        p.className = 'fx-particle';
-        p.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
-        p.style.color = colors[Math.floor(Math.random() * colors.length)];
-        var angle = (Math.PI * 2 * i) / N + (Math.random() - 0.5) * 0.3;
-        var dist = 90 + Math.random() * 90;
-        p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-        p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
-        p.style.setProperty('--rot', (Math.random() - 0.5) * 360 + 'deg');
-        p.style.fontSize = 12 + Math.random() * 12 + 'px';
-        p.style.left = cx + 'px';
-        p.style.top = cy + 'px';
-        p.style.animationDelay = Math.random() * 0.08 + 's';
-        layer.appendChild(p);
-        (function (node) { setTimeout(function () { node.remove(); }, 1700); })(p);
-      }
+      var glyphs = ['♥', '✦', '✧', '❀', '❁', '✿', '❤', '★', '❃'];
+      var colors = ['#e88ca0', '#c9a063', '#8a9aa8', '#c77f8a', '#b88660', '#e3a87a', '#d4a5b8', '#a8b8d4'];
+      var maxSpan = Math.min(window.innerWidth, window.innerHeight) * 0.48;
+      var waves = [
+        { count: 36, minDist: 110, maxDist: maxSpan,       size: [18, 36], delay: 0,   duration: 1600 },
+        { count: 28, minDist: 70,  maxDist: maxSpan * 0.8, size: [14, 28], delay: 180, duration: 1500 },
+        { count: 22, minDist: 40,  maxDist: maxSpan * 0.55,size: [12, 22], delay: 360, duration: 1400 },
+      ];
+      var totalLife = 0;
+      waves.forEach(function (w) {
+        setTimeout(function () {
+          for (var i = 0; i < w.count; i++) {
+            var p = document.createElement('span');
+            p.className = 'fx-particle';
+            p.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+            p.style.color = colors[Math.floor(Math.random() * colors.length)];
+            var angle = (Math.PI * 2 * i) / w.count + (Math.random() - 0.5) * 0.4;
+            var dist = w.minDist + Math.random() * (w.maxDist - w.minDist);
+            var drift = 60 + Math.random() * 80;
+            p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+            p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+            p.style.setProperty('--fy', drift + 'px');
+            p.style.setProperty('--rot', (Math.random() - 0.5) * 540 + 'deg');
+            p.style.fontSize = w.size[0] + Math.random() * (w.size[1] - w.size[0]) + 'px';
+            p.style.left = cx + 'px';
+            p.style.top = cy + 'px';
+            p.style.animationDuration = w.duration + 'ms';
+            p.style.animationDelay = Math.random() * 0.12 + 's';
+            layer.appendChild(p);
+            (function (node, life) {
+              setTimeout(function () { node.remove(); }, life + 200);
+            })(p, w.duration);
+          }
+        }, w.delay);
+        totalLife = Math.max(totalLife, w.delay + w.duration);
+      });
       setTimeout(function () {
         if (layer && !layer.firstChild) layer.remove();
-      }, 1900);
+      }, totalLife + 400);
     }
     bind();
     document.addEventListener('astro:page-load', bind);
@@ -106,13 +122,18 @@ const counts = Object.fromEntries(
     position: fixed;
     transform: translate(-50%, -50%);
     opacity: 0;
-    animation: fxFly 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: fxFly cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-duration: 1.5s;
     will-change: transform, opacity;
+    text-shadow: 0 0 6px rgba(255, 220, 180, 0.4);
+    filter: drop-shadow(0 0 3px rgba(255, 230, 200, 0.5));
   }
   @keyframes fxFly {
-    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(0); }
-    15%  { opacity: 1; transform: translate(calc(-50% + var(--tx) * 0.3), calc(-50% + var(--ty) * 0.3)) scale(1.05) rotate(calc(var(--rot) * 0.3)); }
-    100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty) + 30px)) scale(0.6) rotate(var(--rot)); }
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.2) rotate(0); }
+    10%  { opacity: 1; transform: translate(-50%, -50%) scale(1.3) rotate(calc(var(--rot) * 0.15)); }
+    35%  { opacity: 1; transform: translate(calc(-50% + var(--tx) * 0.55), calc(-50% + var(--ty) * 0.55)) scale(1.1) rotate(calc(var(--rot) * 0.5)); }
+    70%  { opacity: 0.9; transform: translate(calc(-50% + var(--tx) * 0.9), calc(-50% + var(--ty) * 0.9 + var(--fy, 40px) * 0.4)) scale(0.95) rotate(calc(var(--rot) * 0.8)); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty) + var(--fy, 60px))) scale(0.55) rotate(var(--rot)); }
   }
 </style>
 
