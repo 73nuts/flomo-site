@@ -10,12 +10,13 @@ interface Props {
   date: string;
   body: string;
   tags: string[];
+  title?: string;
 }
 
-const { tabId, id, date, body, tags } = Astro.props;
+const { tabId, id, date, body, tags, title } = Astro.props;
 const href = url(`${tabId}/${id}`);
 // 长文阈值：中英混合按字符数 200 粗略估计
-const isLong = body.length > 200;
+const isLong = body.length > 200 || !!title;
 ---
 
 <a class="card" href={href}>
@@ -31,6 +32,7 @@ const isLong = body.length > 200;
       )
     }
   </div>
+  {title && <h2 class="card-title">{title}</h2>}
   {
     isLong ? (
       <LongMemo client:idle>
@@ -56,5 +58,14 @@ const isLong = body.length > 200;
     display: flex;
     gap: 5px;
     flex-wrap: wrap;
+  }
+  .card-title {
+    font-family: var(--brush);
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    margin: 4px 0 10px;
+    line-height: 1.5;
   }
 </style>

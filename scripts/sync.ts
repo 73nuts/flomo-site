@@ -139,6 +139,7 @@ function toMarkdown(meta: {
   if (meta.time) fmLines.push(`time: "${meta.time}"`);
   if (meta.tags.length) fmLines.push(`tags: [${meta.tags.map((t) => JSON.stringify(t)).join(', ')}]`);
   if (meta.from) fmLines.push(`from: ${JSON.stringify(meta.from)}`);
+  fmLines.push('source: "flomo"');
 
   const fm = ['---', ...fmLines, '---', ''].join('\n');
   const body =
@@ -148,20 +149,44 @@ function toMarkdown(meta: {
   return `${fm}${body}\n`;
 }
 
+/** 扫描 outDir，只删 frontmatter 里 source == 'flomo' 的旧 md，其余（vault/manual）保留 */
+async function clearOldFlomoFiles(outDir: string): Promise<number> {
+  const { readdir, unlink, readFile } = await import('node:fs/promises');
+  if (!existsSync(outDir)) return 0;
+  const files = await readdir(outDir);
+  let deleted = 0;
+  for (const f of files) {
+    if (!f.endsWith('.md')) continue;
+    const full = join(outDir, f);
+    const content = await readFile(full, 'utf8');
+    // 简单扫 frontmatter 的 source 行；默认（未声明）视为 flomo（与 Zod default 一致）
+    const m = content.match(/^---[\s\S]*?\nsource:\s*["']?(flomo|vault|manual)["']?/m);
+    const source = m?.[1] ?? 'flomo';
+    if (source === 'flomo') {
+      await unlink(full);
+      deleted++;
+    }
+  }
+  return deleted;
+}
+
 async function syncTab(tab: (typeof TABS)[number], deleted: Set<string>) {
   const src = join(SYNC_DIR, tab.dir, '阿鸭的笔记.html');
   const outDir = join(OUT_DIR, tab.id);
 
   if (!existsSync(src)) {
     console.warn(`[sync] ${tab.id} ← 源文件不存在：${src} —— 跳过`);
-    return { tab: tab.id, count: 0, skipped: 0 };
+    return { tab: tab.id, count: 0, skipped: 0, kept: 0 };
   }
 
   const html = readFileSync(src, 'utf8');
   const raw = extractMemos(html);
 
-  await rm(outDir, { recursive: true, force: true });
   await mkdir(outDir, { recursive: true });
+  const wiped = await clearOldFlomoFiles(outDir);
+  // 统计保留下来的非-flomo 文件
+  const { readdir } = await import('node:fs/promises');
+  const remaining = (await readdir(outDir)).filter((f) => f.endsWith('.md')).length;
 
   const seen = new Map<string, number>(); // id → 出现次数（处理极罕见的同秒冲突）
   let written = 0;
@@ -194,9 +219,12 @@ async function syncTab(tab: (typeof TABS)[number], deleted: Set<string>) {
     written++;
   }
 
-  const suffix = skipped > 0 ? `（跳过 ${skipped} 条永久删除项）` : '';
-  console.log(`[sync] ${tab.id} ← ${tab.dir}: ${written} 条${suffix}`);
-  return { tab: tab.id, count: written, skipped };
+  const parts: string[] = [`${written} 条`];
+  if (skipped > 0) parts.push(`跳过 ${skipped} 条永久删除项`);
+  if (remaining > 0) parts.push(`保留 ${remaining} 条手工条目`);
+  console.log(`[sync] ${tab.id} ← ${tab.dir}: ${parts.join('，')}`);
+  void wiped;
+  return { tab: tab.id, count: written, skipped, kept: remaining };
 }
 
 async function main() {

@@ -70,7 +70,7 @@ flomo-site/
 | jg | 吉光片羽    | #c9a063  | `~/Documents/flomo-sync/jiguang/`       |
 | ds | 读书笔记    | #8a9aa8  | `~/Documents/flomo-sync/dushu/`         |
 | qh | 阿鸭情话    | #c77f8a  | `~/Documents/flomo-sync/qinghua/`       |
-| gd | 灌点鸭汤    | #b88660  | `~/Documents/flomo-sync/gd/`            |
+| gd | 浮一大白    | #b88660  | `~/Documents/flomo-sync/gd/`            |
 | wa | 晚安计划    | #7a8aa0  | `~/Documents/flomo-sync/wa/`            |
 
 改名 / 换色 / 增减：动 `src/lib/tabs.ts` 一处即可。
@@ -99,6 +99,43 @@ cd ~/flomo-site && pnpm sync && git add -A && git commit -m "data: $(date +%m-%d
 ```
 
 GitHub Actions 检测到 master push 自动触发 `pnpm install` → `pnpm build` → 部署到 Pages。通常 2-3 分钟后线上生效。
+
+---
+
+## 手工条目（vault 长文 / manual）
+
+除了 flomo 同步的短随笔，支持手工插入任何 tab 下的条目——比如 `~/vault/` 里的长文。
+
+**机制**：每条 md 的 frontmatter 有 `source` 字段：
+- `flomo`（默认）：由 `pnpm sync` 从 flomo HTML 生成，每次 sync 会重写
+- `vault`：手工从 Obsidian vault 搬运的长文，sync **不会动**
+- `manual`：完全手写的条目，同样 sync **不会动**
+
+**添加一条手工条目**（以 vault 长文为例）：
+
+```bash
+# 文件名：任意稳定 slug，例如 essay-xxx.md
+# 放在对应 tab 目录下
+vim src/content/memos/jg/essay-my-essay.md
+```
+
+frontmatter 模板：
+
+```yaml
+---
+id: "essay-my-essay"            # 必须唯一，会成为 URL 的 slug
+tab: "jg"                        # 所属 tab
+date: "2026-04-24"               # 决定列表排序位置
+time: "09:30"                    # 可选
+title: "我的长文标题"             # 可选，有 title 会在列表/阅读页顶部突出显示
+source: "vault"                  # 关键：保护不被 sync 覆盖
+tags: ["长文"]                   # 可选
+---
+
+这里是正文，支持完整 markdown：#/##/### 标题、有序/无序列表、**粗体**、[链接](https://...)、引用、分隔线等。
+```
+
+URL 自动为 `/jg/essay-my-essay`。
 
 ---
 

@@ -17,6 +17,13 @@ const memos = defineCollection({
     tags: z.array(z.string()).default([]),
     /** 引用来源（书名 / 作者），可选 */
     from: z.string().optional(),
+    /**
+     * 数据来源。flomo = 由 pnpm sync 从 flomo 导出生成（会被重建覆盖）；
+     * vault/manual = 手工维护（sync 不碰）。
+     */
+    source: z.enum(['flomo', 'vault', 'manual']).default('flomo'),
+    /** 可选的自定义标题（长文场景使用） */
+    title: z.string().optional(),
   }),
 });
 

@@ -347,6 +347,85 @@ button {
   background: var(--accent);
   opacity: 0.5;
 }
+
+/* 长文 markdown 渲染 —— 标题 / 列表 / 引用 / 链接 */
+.paper .body h1,
+.paper .body h2,
+.paper .body h3,
+.paper .body h4 {
+  font-family: var(--brush);
+  color: var(--ink);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+}
+.paper .body h1 { font-size: 22px; margin: 2em 0 0.6em; }
+.paper .body h2 {
+  font-size: 18px;
+  margin: 2em 0 0.5em;
+  padding-left: 14px;
+  border-left: 3px solid rgba(var(--accent-rgb), 0.4);
+}
+.paper .body h3 { font-size: 16px; margin: 1.6em 0 0.4em; color: var(--ink-soft); }
+.paper .body h4 { font-size: 15px; margin: 1.4em 0 0.3em; color: var(--muted); }
+.paper .body h1:first-child,
+.paper .body h2:first-child,
+.paper .body h3:first-child {
+  margin-top: 0;
+}
+
+.paper .body ol {
+  margin: 0 0 1em;
+  padding-left: 1.6em;
+}
+.paper .body ol li {
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+.paper .body ol li::marker {
+  color: var(--accent);
+  font-family: var(--sans);
+  font-size: 13px;
+}
+
+.paper .body blockquote {
+  margin: 1.4em 0;
+  padding: 0 0 0 18px;
+  border-left: 3px solid rgba(var(--accent-rgb), 0.35);
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.paper .body a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--accent-rgb), 0.3);
+  text-underline-offset: 2px;
+  transition: text-decoration-color var(--dur-fast) var(--ease);
+}
+.paper .body a:hover {
+  text-decoration-color: rgba(var(--accent-rgb), 0.9);
+}
+
+.paper .body strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.paper .body hr {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--line), transparent);
+  margin: 2.4em 0;
+}
+
+.paper .body code {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.9em;
+  background: rgba(var(--accent-rgb), 0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
 .paper .from {
   margin-top: 28px;
   font-family: var(--sans);

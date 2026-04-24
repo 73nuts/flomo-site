@@ -1,7 +1,8 @@
 ---
 /**
- * Render markdown content: split paragraphs by blank lines, detect `- item` lists.
- * 保持原格式，不做 markdown-to-html（我们只有短随笔 + 列表）。
+ * 列表页的 memo 正文预览。按空行切段，`- ` 前缀识别列表，
+ * 粗略去掉 markdown 标题前缀（`#+ `）避免预览里出现裸井号。
+ * 阅读页（[slug].astro）走 Astro 原生 render() 做完整 markdown 渲染。
  */
 interface Props {
   body: string;
@@ -14,6 +15,14 @@ const trimmed = body.trim();
 const lines = trimmed.split('\n');
 const allListItems = lines.every((l) => l.trim().startsWith('- ') || l.trim() === '');
 const isList = lines.some((l) => l.trim().startsWith('- ')) && allListItems;
+
+function stripMdMarks(s: string): string {
+  return s
+    .replace(/^#{1,6}\s+/gm, '') // 标题前缀
+    .replace(/^>\s+/gm, '')       // 引用前缀
+    .replace(/\*\*([^*]+)\*\*/g, '$1') // 粗体
+    .replace(/\*([^*]+)\*/g, '$1');    // 斜体
+}
 ---
 
 {
@@ -23,13 +32,13 @@ const isList = lines.some((l) => l.trim().startsWith('- ')) && allListItems;
         {lines
           .map((l) => l.trim())
           .filter((l) => l.startsWith('- '))
-          .map((l) => <li>{l.slice(2)}</li>)}
+          .map((l) => <li>{stripMdMarks(l.slice(2))}</li>)}
       </ul>
     </div>
   ) : (
     <div class={cls}>
       {trimmed.split(/\n\s*\n/).map((p) => (
-        <p>{p}</p>
+        <p>{stripMdMarks(p)}</p>
       ))}
     </div>
   )
