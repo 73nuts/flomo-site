@@ -3,6 +3,7 @@ import Base from '~/layouts/Base.astro';
 import MemoCard from '~/components/MemoCard.astro';
 import MonthSeparator from '~/components/MonthSeparator.astro';
 import SkyBanner from '~/components/SkyBanner.astro';
+import DesktopSidebar from '~/components/DesktopSidebar.astro';
 import VisitCounter from '~/components/islands/VisitCounter.svelte';
 import { TABS, TAB_BY_ID, type TabId } from '~/lib/tabs';
 import { monthKey } from '~/lib/date';
@@ -40,7 +41,8 @@ const title = `${tab.name} · 阿鸭的随笔`;
 ---
 
 <Base title={title} accent={tab.accent} accentRgb={tab.accentRgb}>
-  <main class="screen fade-in">
+  <DesktopSidebar currentTab={tabParam} />
+  <main class="screen has-sidebar" transition:name="screen" transition:animate="slide">
     <SkyBanner />
 
     <header class="topbar">

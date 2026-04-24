@@ -39,12 +39,25 @@ const initial = skyFromHour(new Date().getHours());
 
 <style is:global>
   #sky {
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 300px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 360px;
     pointer-events: none;
     transition: background 0.8s ease;
     z-index: 0;
+  }
+  /* 底部柔和淡出到页面底色，让 sky 和内容无缝衔接 */
+  #sky::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 80px;
+    background: linear-gradient(to bottom, transparent, var(--bg-page));
+    pointer-events: none;
   }
   #sky.morning {
     background: linear-gradient(180deg, #fcd9b8 0%, #f8d1a8 22%, #f4e2cc 48%, #f5f1e9 78%);

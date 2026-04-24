@@ -1,0 +1,179 @@
+---
+/**
+ * 桌面端左侧便签架（≥1024px 显示）。
+ * 5 张便签微倾斜 + 胶带；当前 tab 扶正 + inset accent 边。
+ * 页脚显示"今天的第 N 次来看阿鸭"（visit counter 岛屿）。
+ *
+ * 移动端完全隐藏（CSS @media）。
+ */
+import { TABS, type TabId } from '~/lib/tabs';
+import { url } from '~/lib/url';
+import VisitCounter from '~/components/islands/VisitCounter.svelte';
+import { getCollection } from 'astro:content';
+
+interface Props {
+  currentTab?: TabId;
+}
+
+const { currentTab } = Astro.props;
+const all = await getCollection('memos');
+const counts = Object.fromEntries(
+  TABS.map((t) => [t.id, all.filter((m) => m.data.tab === t.id).length])
+);
+---
+
+<aside class="sidebar">
+  <a class="brand" href={url('')}>
+    <img src={url('avatar.jpg')} alt="阿鸭" />
+    <span class="name">阿 鸭 的 随 笔</span>
+  </a>
+
+  <nav class="rack" aria-label="便签架">
+    {
+      TABS.map((t, i) => (
+        <a
+          class:list={['tab', { active: t.id === currentTab }]}
+          href={url(t.id)}
+          data-i={i}
+          style={`--accent: ${t.accent}; --accent-rgb: ${t.accentRgb};`}
+        >
+          <span class="tape" />
+          <div class="tn">{t.name}</div>
+          <div class="sub">{counts[t.id] ?? 0} · {t.subtitle}</div>
+          <span class="motif" />
+        </a>
+      ))
+    }
+  </nav>
+
+  <div class="sidebar-foot">
+    <VisitCounter client:only="svelte" />
+  </div>
+</aside>
+
+<style>
+  .sidebar {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 240px;
+      padding: 28px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      z-index: 30;
+      background: rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(14px) saturate(120%);
+      -webkit-backdrop-filter: blur(14px) saturate(120%);
+      border-right: 1px solid rgba(42, 36, 30, 0.06);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+      padding: 4px 2px 10px;
+      border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+    }
+    .brand img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+    .brand .name {
+      font-family: var(--brush);
+      font-size: 14px;
+      letter-spacing: 0.18em;
+    }
+
+    .rack {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 10px 4px;
+      overflow: hidden;
+    }
+    .tab {
+      position: relative;
+      background: var(--bg-paper);
+      border-radius: 4px;
+      padding: 16px 18px 14px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+      color: var(--ink);
+      transition: all 0.3s var(--ease);
+      opacity: 0.72;
+    }
+    .tab[data-i='0'] { transform: rotate(-1.6deg); }
+    .tab[data-i='1'] { transform: rotate( 1.2deg); }
+    .tab[data-i='2'] { transform: rotate(-0.8deg); }
+    .tab[data-i='3'] { transform: rotate( 1.4deg); }
+    .tab[data-i='4'] { transform: rotate(-0.5deg); }
+    .tab:hover {
+      opacity: 0.95;
+      transform: rotate(0deg) translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    .tab.active {
+      opacity: 1;
+      transform: rotate(0deg) translateX(6px);
+      box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.12),
+        0 2px 4px rgba(0, 0, 0, 0.06),
+        inset 4px 0 0 var(--accent);
+    }
+    .tab .tape {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      width: 42px;
+      height: 13px;
+      background: rgba(var(--accent-rgb), 0.35);
+      border-radius: 1px;
+      opacity: 0.85;
+    }
+    .tab .tn {
+      font-family: var(--brush);
+      font-size: 16px;
+      letter-spacing: 0.12em;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .tab .sub {
+      font-family: var(--sans);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+    .tab .motif {
+      position: absolute;
+      right: 10px;
+      bottom: 8px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(var(--accent-rgb), 0.7);
+      opacity: 0.7;
+    }
+
+    .sidebar-foot {
+      border-top: 1px dashed rgba(0, 0, 0, 0.08);
+      padding-top: 8px;
+    }
+    .sidebar-foot :global(.counter) {
+      margin: 0;
+      border: 0;
+      padding: 8px 0;
+    }
+  }
+</style>
