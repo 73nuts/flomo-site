@@ -23,9 +23,12 @@
 </script>
 
 <div class="counter">
-  <span>今 天 的 第</span>
+  <span>今 天 第</span>
   <span class="n">{n}</span>
   <span>次 来 看 阿 鸭</span>
+  {#if n >= 10}
+    <span class="whisper">既 然 这 么 想 我，不 如 给 我 发 消 息 吧</span>
+  {/if}
 </div>
 
 <style>
@@ -50,5 +53,19 @@
     line-height: 1;
     transform: rotate(-4deg);
     margin: 2px 0;
+  }
+  .whisper {
+    margin-top: 10px;
+    font-family: var(--hand);
+    font-size: 13px;
+    color: var(--accent, var(--muted));
+    letter-spacing: 0.18em;
+    opacity: 0.85;
+    transform: rotate(-1.5deg);
+    animation: whisperIn 0.9s 0.2s ease both;
+  }
+  @keyframes whisperIn {
+    from { opacity: 0; transform: rotate(-1.5deg) translateY(6px); }
+    to   { opacity: 0.85; transform: rotate(-1.5deg) translateY(0); }
   }
 </style>
