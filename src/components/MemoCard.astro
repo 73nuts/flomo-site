@@ -1,0 +1,59 @@
+---
+import { fmtDate } from '~/lib/date';
+import MemoBody from './MemoBody.astro';
+import LongMemo from './islands/LongMemo.svelte';
+
+interface Props {
+  tabId: string;
+  id: string;
+  date: string;
+  body: string;
+  tags: string[];
+}
+
+const { tabId, id, date, body, tags } = Astro.props;
+const href = `/${tabId}/${id}`;
+// 长文阈值：中英混合按字符数 200 粗略估计
+const isLong = body.length > 200;
+---
+
+<a class="card" href={href}>
+  <div class="meta">
+    <span class="ts">{fmtDate(date)}</span>
+    {
+      tags.length > 0 && (
+        <span class="tags">
+          {tags.map((t) => (
+            <span class="tag">{t}</span>
+          ))}
+        </span>
+      )
+    }
+  </div>
+  {
+    isLong ? (
+      <LongMemo client:idle>
+        <MemoBody body={body} />
+      </LongMemo>
+    ) : (
+      <MemoBody body={body} />
+    )
+  }
+  <span class="fold-corner"></span>
+</a>
+
+<style>
+  .card { color: var(--ink); }
+  .meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .tags {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+</style>

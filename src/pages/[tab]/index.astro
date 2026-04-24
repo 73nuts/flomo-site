@@ -1,0 +1,72 @@
+---
+import Base from '~/layouts/Base.astro';
+import MemoCard from '~/components/MemoCard.astro';
+import MonthSeparator from '~/components/MonthSeparator.astro';
+import SkyBanner from '~/components/islands/SkyBanner.svelte';
+import VisitCounter from '~/components/islands/VisitCounter.svelte';
+import { TABS, TAB_BY_ID, type TabId } from '~/lib/tabs';
+import { monthKey } from '~/lib/date';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  return TABS.map((t) => ({ params: { tab: t.id } }));
+}
+
+const { tab: tabParam } = Astro.params as { tab: TabId };
+const tab = TAB_BY_ID[tabParam];
+const all = await getCollection('memos');
+const memos = all
+  .filter((m) => m.data.tab === tabParam)
+  .sort((a, b) => (a.data.date < b.data.date ? 1 : -1));
+
+// 按月份分组
+interface Group {
+  key: string;
+  items: typeof memos;
+}
+const groups: Group[] = [];
+let current: Group | null = null;
+for (const m of memos) {
+  const k = monthKey(m.data.date);
+  if (!current || current.key !== k) {
+    current = { key: k, items: [] };
+    groups.push(current);
+  }
+  current.items.push(m);
+}
+
+const title = `${tab.name} · 阿鸭的随笔`;
+---
+
+<Base title={title} accent={tab.accent} accentRgb={tab.accentRgb}>
+  <main class="screen fade-in">
+    <SkyBanner client:only="svelte" />
+
+    <header class="topbar">
+      <a class="back" href="/">返回</a>
+      <h1 class="title">{tab.name.split('').join(' ')}</h1>
+      <span class="cnt">{memos.length} 则</span>
+    </header>
+
+    <section class="reading">
+      {
+        groups.map((g) => (
+          <div class="group">
+            <MonthSeparator date={g.items[0]?.data.date ?? ''} />
+            {g.items.map((m) => (
+              <MemoCard
+                tabId={tabParam}
+                id={m.data.id}
+                date={m.data.date}
+                body={m.body ?? ''}
+                tags={m.data.tags ?? []}
+              />
+            ))}
+          </div>
+        ))
+      }
+
+      <VisitCounter client:only="svelte" />
+    </section>
+  </main>
+</Base>

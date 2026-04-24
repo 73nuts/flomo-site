@@ -1,0 +1,16 @@
+---
+import { fmtMonth } from '~/lib/date';
+
+interface Props {
+  date: string;
+}
+
+const { date } = Astro.props;
+const { cn, en } = fmtMonth(date);
+---
+
+<div class="month-sep">
+  <span class="cn">{cn}</span>
+  <span class="rule"></span>
+  <span class="en">{en}</span>
+</div>

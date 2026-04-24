@@ -1,0 +1,37 @@
+---
+import '@fontsource/noto-serif-sc/400.css';
+import '@fontsource/noto-serif-sc/500.css';
+import '@fontsource/noto-serif-sc/600.css';
+import '@fontsource/ma-shan-zheng/400.css';
+import '@fontsource/zcool-xiaowei/400.css';
+import '~/styles/theme.css';
+import { ClientRouter } from 'astro:transitions';
+
+interface Props {
+  title: string;
+  description?: string;
+  accent?: string;
+  accentRgb?: string;
+}
+
+const { title, description = '阿鸭的碎片与光亮', accent, accentRgb } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f5f1e9" />
+    <meta name="description" content={description} />
+    <link rel="icon" href="/avatar.jpg" />
+    <title>{title}</title>
+    <ClientRouter />
+    {accent && (
+      <style set:html={`:root { --accent: ${accent}; --accent-rgb: ${accentRgb}; }`} />
+    )}
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,113 @@
+---
+import Base from '~/layouts/Base.astro';
+import TabCard from '~/components/TabCard.astro';
+import { TABS } from '~/lib/tabs';
+import { getCollection } from 'astro:content';
+
+// 每个 tab 的 memo 数量
+const memos = await getCollection('memos');
+const counts = Object.fromEntries(
+  TABS.map((t) => [t.id, memos.filter((m) => m.data.tab === t.id).length])
+);
+---
+
+<Base title="阿鸭的随笔">
+  <main class="entry">
+    <header class="brand">
+      <img class="avatar" src="/avatar.jpg" alt="阿鸭" />
+      <h1 class="name">阿 鸭 的 随 笔</h1>
+      <p class="bio">记录生活中的碎片与光亮</p>
+    </header>
+
+    <section class="tab-grid">
+      {TABS.map((t) => <TabCard tab={t} count={counts[t.id] ?? 0} />)}
+    </section>
+
+    <footer>a &nbsp; r e a d i n g &nbsp; p a g e</footer>
+  </main>
+</Base>
+
+<style>
+  .entry {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 60px 24px 36px;
+    gap: 30px;
+  }
+  .brand {
+    text-align: center;
+  }
+  .avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    margin-bottom: 14px;
+  }
+  .name {
+    font-family: var(--brush);
+    font-size: 24px;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .bio {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin: 0;
+  }
+  .tab-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    max-width: 360px;
+    margin: 0 auto;
+    width: 100%;
+    align-self: center;
+  }
+  /* 卡片统一 start 对齐，防 grid stretch 配 aspect-ratio 撑大宽度 */
+  .tab-grid :global(.tab-card) { align-self: start; }
+
+  /* 仅移动端：2x2 + 单张独居；微错位感 */
+  @media (max-width: 719px) {
+    .tab-grid :global(.tab-card:nth-child(1)) { transform: rotate(-2deg); }
+    .tab-grid :global(.tab-card:nth-child(2)) { transform: rotate(1.4deg); margin-top: 18px; }
+    .tab-grid :global(.tab-card:nth-child(3)) { transform: rotate(1.8deg); }
+    .tab-grid :global(.tab-card:nth-child(4)) { transform: rotate(-1deg); margin-top: 16px; }
+    .tab-grid :global(.tab-card:nth-child(5)) {
+      grid-column: 1 / -1;
+      width: calc(50% - 7px);
+      justify-self: center;
+      transform: rotate(-0.6deg);
+      margin-top: 8px;
+    }
+  }
+
+  footer {
+    text-align: center;
+    font-family: var(--sans);
+    font-size: 10px;
+    color: var(--muted-2);
+    letter-spacing: 0.2em;
+  }
+
+  /* 桌面端 —— 网格铺开，便签仍是便签 */
+  @media (min-width: 720px) {
+    .entry { padding: 80px 40px 50px; gap: 50px; }
+    .tab-grid {
+      max-width: 720px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .tab-grid :global(.tab-card:nth-child(1)) { transform: rotate(-1.6deg); }
+    .tab-grid :global(.tab-card:nth-child(2)) { transform: rotate(1.2deg); }
+    .tab-grid :global(.tab-card:nth-child(3)) { transform: rotate(-0.8deg); }
+    .tab-grid :global(.tab-card:nth-child(4)) { transform: rotate(1.4deg); }
+    .tab-grid :global(.tab-card:nth-child(5)) { transform: rotate(-0.5deg); }
+  }
+</style>

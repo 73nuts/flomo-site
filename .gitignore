@@ -1,3 +1,23 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# system / editor
 .DS_Store
-*.pyc
+.idea/
+.vscode/
+
+# logs
+*.log
+
+# env
+.env
+.env.production
+
+# python residue
 __pycache__/
+.ruff_cache/
+*.pyc

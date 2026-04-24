@@ -1,0 +1,29 @@
+{
+  "name": "flomo-site",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "阿鸭的随笔 —— 个人随笔展示站",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "sync": "bun run scripts/sync.ts",
+    "check": "astro check",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/svelte": "^7.0.0",
+    "@fontsource/ma-shan-zheng": "^5.1.0",
+    "@fontsource/noto-serif-sc": "^5.1.0",
+    "@fontsource/zcool-xiaowei": "^5.1.0",
+    "astro": "^5.1.0",
+    "svelte": "^5.15.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.8",
+    "@types/node": "^22.10.0",
+    "node-html-parser": "^7.0.1",
+    "typescript": "^5.7.0"
+  }
+}

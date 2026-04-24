@@ -1,0 +1,91 @@
+---
+import Base from '~/layouts/Base.astro';
+import MemoBody from '~/components/MemoBody.astro';
+import ReaderNav from '~/components/islands/ReaderNav.svelte';
+import { TABS, TAB_BY_ID, type TabId } from '~/lib/tabs';
+import { fmtDate } from '~/lib/date';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const all = await getCollection('memos');
+  return TABS.flatMap((t) => {
+    const sorted = all
+      .filter((m) => m.data.tab === t.id)
+      .sort((a, b) => (a.data.date < b.data.date ? 1 : -1));
+    return sorted.map((m, i) => ({
+      params: { tab: t.id, slug: m.data.id },
+      props: {
+        memo: m,
+        prev: sorted[i - 1]?.data.id ?? null,
+        next: sorted[i + 1]?.data.id ?? null,
+        total: sorted.length,
+        idx: i + 1,
+      },
+    }));
+  });
+}
+
+interface MemoEntry {
+  data: { id: string; date: string; time?: string; tags: string[]; from?: string };
+  body?: string;
+}
+
+const { tab: tabParam } = Astro.params as { tab: TabId };
+const tab = TAB_BY_ID[tabParam];
+const { memo, prev, next, total, idx } = Astro.props as {
+  memo: MemoEntry;
+  prev: string | null;
+  next: string | null;
+  total: number;
+  idx: number;
+};
+
+const title = `${memo.data.date} · ${tab.name}`;
+const prevHref = prev ? `/${tabParam}/${prev}` : null;
+const nextHref = next ? `/${tabParam}/${next}` : null;
+const closeHref = `/${tabParam}`;
+---
+
+<Base title={title} accent={tab.accent} accentRgb={tab.accentRgb}>
+  <main class="screen fade-in">
+    <header class="topbar">
+      <a class="back" href={closeHref}>返回</a>
+      <h1 class="title">{tab.name}</h1>
+      <span class="cnt">
+        {String(idx).padStart(2, '0')} / {String(total).padStart(2, '0')}
+      </span>
+    </header>
+
+    <section class="reading">
+      <article class="paper">
+        <div class="meta">
+          <span class="ts">{fmtDate(memo.data.date)}</span>
+          {
+            memo.data.tags?.length > 0 && (
+              <span class="tags">
+                {memo.data.tags.map((t) => (
+                  <span class="tag">{t}</span>
+                ))}
+              </span>
+            )
+          }
+        </div>
+        <div class="divider"></div>
+        <MemoBody body={memo.body ?? ''} class="body" />
+        {memo.data.from && <div class="from">{memo.data.from}</div>}
+        <div class="end-mark">终</div>
+        <span class="fold"></span>
+      </article>
+
+      <ReaderNav client:load {prevHref} {nextHref} {closeHref} />
+    </section>
+  </main>
+</Base>
+
+<style>
+  .tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+</style>

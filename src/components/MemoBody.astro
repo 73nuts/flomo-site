@@ -1,0 +1,36 @@
+---
+/**
+ * Render markdown content: split paragraphs by blank lines, detect `- item` lists.
+ * 保持原格式，不做 markdown-to-html（我们只有短随笔 + 列表）。
+ */
+interface Props {
+  body: string;
+  class?: string;
+}
+
+const { body, class: cls = 'memo-body' } = Astro.props;
+
+const trimmed = body.trim();
+const lines = trimmed.split('\n');
+const allListItems = lines.every((l) => l.trim().startsWith('- ') || l.trim() === '');
+const isList = lines.some((l) => l.trim().startsWith('- ')) && allListItems;
+---
+
+{
+  isList ? (
+    <div class={cls}>
+      <ul>
+        {lines
+          .map((l) => l.trim())
+          .filter((l) => l.startsWith('- '))
+          .map((l) => <li>{l.slice(2)}</li>)}
+      </ul>
+    </div>
+  ) : (
+    <div class={cls}>
+      {trimmed.split(/\n\s*\n/).map((p) => (
+        <p>{p}</p>
+      ))}
+    </div>
+  )
+}
