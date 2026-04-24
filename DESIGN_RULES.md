@@ -161,4 +161,29 @@
 
 ---
 
+## R13 · 彩蛋清单（2026-04-24 锁定）
+
+五个触发式彩蛋，都用 `var(--brush)` 字体（和主视觉一致），不用 emoji/卡通，保持原版纸本质感。
+
+| # | 触发条件 | 效果 | 实现位置 |
+|---|---|---|---|
+| 1 | 00:00-04:59 访问 | Sky banner 变深蓝星空色 + 散落星点；计数卡底部多一行「这 么 晚 还 想 我，快 去 睡 吧」+ 轻摇小月亮 🌙 | `SkyBanner.astro` · `lib/sky.ts`（midnight 类型）· `VisitCounter.svelte`（isMidnight 分支）|
+| 2 | 当日访问次数 ≥ 10 | 计数卡底部浮现「既 然 这 么 想 我，不 如 给 我 发 消 息 吧」，左侧一枚线描信封 SVG | `VisitCounter.svelte`（n >= 10 分支）|
+| 3 | 阅读页点击底部「终」字 | 终字弹跳 + 5 颗小心随机飞散上浮 + 顶部浮现「你 看 完 啦 ~」1.8s | `EndMark.svelte` island（`[slug].astro` 引用）|
+| 4 | 首页头像 2 秒内连点 10 次 | DOM 粒子烟花：45 颗主波 + 200ms 后 12 颗余波，♥✦✧❀❁✿❤ × 6 色，translate3d GPU 合成 | `index.astro` inline script + `#fireworks-layer` |
+| 5 | 任意页面打开 DevTools | console 输出 ASCII 阿鸭 + 「偷偷翻代码的你，被阿鸭看到啦 ~」 | `Base.astro`（`<script is:inline>`，session 级去重）|
+
+**禁止**：
+- 彩蛋使用非现有 4 字族字体或 emoji（破坏整体纸质感 —— emoji 曾出现过"像彩纸屑廉价"问题）
+- 彩蛋粒子用 `filter: drop-shadow` / `text-shadow`（强制合成层爆炸，卡帧元凶）
+- canvas-based 粒子（`shapeFromText` 光栅化字符后像素糊，不如 DOM 原生字体清晰）
+- 阅读页静态 `<div class="end-mark">终</div>`（已被 EndMark 交互岛取代，不要回退）
+
+**加新彩蛋时**：
+- 触发条件必须罕见（连点 N 次 / 特定时间 / 里程碑 / 快捷键），不能频繁触发打扰阅读
+- 优先用 CSS 动画 + DOM，别上 canvas/WebGL
+- 粒子数 ≤ 60（DOM 版阈值），用 `transform` + `opacity` 让合成层接管
+
+---
+
 改动这里的规则前，先和用户确认。规则先于代码。
