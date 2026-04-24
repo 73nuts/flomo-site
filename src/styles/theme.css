@@ -136,7 +136,11 @@ button {
   -webkit-backdrop-filter: blur(4px);
 }
 .month-sep:first-of-type {
-  margin-top: 0;
+  margin-top: 28px;
+  padding-top: 6px;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 .month-sep .cn {
   font-family: var(--brush);
