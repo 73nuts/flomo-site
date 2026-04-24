@@ -30,90 +30,100 @@ const counts = Object.fromEntries(
   </main>
 </Base>
 
-<script is:inline>
-  (function () {
-    function bind() {
-      var btn = document.getElementById('avatar-egg');
-      if (!btn || btn.dataset.eggBound) return;
-      btn.dataset.eggBound = '1';
-      var count = 0;
-      var timer = null;
-      btn.addEventListener('click', function () {
-        count++;
-        if (timer) clearTimeout(timer);
-        timer = setTimeout(function () { count = 0; }, 2000);
-        btn.animate(
-          [
-            { transform: 'scale(1)' },
-            { transform: 'scale(1.15) rotate(-4deg)' },
-            { transform: 'scale(1)' },
-          ],
-          { duration: 260, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
-        );
-        if (count >= 10) {
-          burst(btn);
-          count = 0;
-        }
+<script>
+  import confetti from 'canvas-confetti';
+
+  function bind() {
+    const btn = document.getElementById('avatar-egg') as HTMLElement | null;
+    if (!btn || btn.dataset.eggBound) return;
+    btn.dataset.eggBound = '1';
+    let count = 0;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    btn.addEventListener('click', () => {
+      count++;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => { count = 0; }, 2000);
+      btn.animate(
+        [
+          { transform: 'scale(1)' },
+          { transform: 'scale(1.15) rotate(-4deg)' },
+          { transform: 'scale(1)' },
+        ],
+        { duration: 260, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
+      );
+      if (count >= 10) {
+        burst(btn);
+        count = 0;
+      }
+    });
+  }
+
+  function burst(el: HTMLElement) {
+    const rect = el.getBoundingClientRect();
+    const x = (rect.left + rect.width / 2) / window.innerWidth;
+    const y = (rect.top + rect.height / 2) / window.innerHeight;
+    const colors = ['#e88ca0', '#c9a063', '#8a9aa8', '#c77f8a', '#b88660', '#e3a87a', '#d4a5b8'];
+
+    const heart = confetti.shapeFromText({ text: '♥', scalar: 2.2 });
+    const sparkle = confetti.shapeFromText({ text: '✦', scalar: 2 });
+    const flower = confetti.shapeFromText({ text: '✿', scalar: 2.2 });
+    const bloom = confetti.shapeFromText({ text: '❀', scalar: 2 });
+    const shapes = [heart, sparkle, flower, bloom, heart];
+
+    // 主炸：360° 扩散 + 中高速，覆盖最广
+    confetti({
+      particleCount: 70,
+      spread: 360,
+      startVelocity: 38,
+      origin: { x, y },
+      shapes,
+      colors,
+      scalar: 1.1,
+      gravity: 0.55,
+      ticks: 180,
+      drift: 0,
+    });
+
+    // 侧炸 1：左上方窄束
+    setTimeout(() => {
+      confetti({
+        particleCount: 35,
+        angle: 120,
+        spread: 55,
+        startVelocity: 50,
+        origin: { x, y },
+        shapes: [heart, flower],
+        colors,
+        scalar: 1.3,
+        gravity: 0.7,
+        ticks: 160,
       });
-    }
-    function burst(el) {
-      var rect = el.getBoundingClientRect();
-      var cx = rect.left + rect.width / 2;
-      var cy = rect.top + rect.height / 2;
-      var layer = document.getElementById('fireworks-layer');
-      if (!layer) {
-        layer = document.createElement('div');
-        layer.id = 'fireworks-layer';
-        document.body.appendChild(layer);
-      }
-      var glyphs = ['♥', '✦', '✧', '❀', '❁', '✿', '❤'];
-      var colors = ['#e88ca0', '#c9a063', '#8a9aa8', '#c77f8a', '#b88660', '#e3a87a'];
-      var maxSpan = Math.min(window.innerWidth, window.innerHeight) * 0.38;
-      var N = 40;
-      for (var i = 0; i < N; i++) {
-        var p = document.createElement('span');
-        p.className = 'fx-particle';
-        p.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
-        p.style.color = colors[Math.floor(Math.random() * colors.length)];
-        var angle = (Math.PI * 2 * i) / N + (Math.random() - 0.5) * 0.25;
-        var dist = 120 + Math.random() * (maxSpan - 120);
-        p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-        p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
-        p.style.setProperty('--rot', (Math.random() - 0.5) * 360 + 'deg');
-        p.style.fontSize = 16 + Math.random() * 14 + 'px';
-        p.style.left = cx + 'px';
-        p.style.top = cy + 'px';
-        p.style.animationDelay = Math.random() * 0.08 + 's';
-        layer.appendChild(p);
-        (function (node) { setTimeout(function () { node.remove(); }, 1700); })(p);
-      }
-      setTimeout(function () {
-        if (layer && !layer.firstChild) layer.remove();
-      }, 1900);
-    }
-    bind();
-    document.addEventListener('astro:page-load', bind);
-  })();
+    }, 120);
+
+    // 侧炸 2：右上方窄束
+    setTimeout(() => {
+      confetti({
+        particleCount: 35,
+        angle: 60,
+        spread: 55,
+        startVelocity: 50,
+        origin: { x, y },
+        shapes: [heart, bloom],
+        colors,
+        scalar: 1.3,
+        gravity: 0.7,
+        ticks: 160,
+      });
+    }, 180);
+  }
+
+  bind();
+  document.addEventListener('astro:page-load', bind);
 </script>
 
 <style is:global>
-  #fireworks-layer {
-    position: fixed;
-    inset: 0;
+  canvas[style*="position: fixed"][style*="z-index"] {
     pointer-events: none;
-    z-index: 9999;
-  }
-  .fx-particle {
-    position: fixed;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    animation: fxFly 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    will-change: transform, opacity;
-  }
-  @keyframes fxFly {
-    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(0); }
-    15%  { opacity: 1; transform: translate(calc(-50% + var(--tx) * 0.3), calc(-50% + var(--ty) * 0.3)) scale(1.05) rotate(calc(var(--rot) * 0.3)); }
-    100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty) + 30px)) scale(0.6) rotate(var(--rot)); }
   }
 </style>
 
