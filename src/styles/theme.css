@@ -63,6 +63,9 @@ body {
   line-height: 1.9;
   min-height: 100vh;
   -webkit-tap-highlight-color: transparent;
+  /* 任意越界元素（长代码/长 URL/长英文 token）不得撑破 viewport，
+     避免移动浏览器自动按内容缩放——R12 移动端优先的硬保证 */
+  overflow-x: clip;
 }
 
 ::selection {
@@ -163,6 +166,9 @@ button {
   border: 1px solid rgba(0, 0, 0, 0.035);
   transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
   display: block;
+  /* flex 子项必须显式 min-width:0 才会响应父级宽度，否则按内容撑大 */
+  min-width: 0;
+  max-width: 100%;
 }
 /* 10 档随机微倾斜 —— ±1.2° 范围，仅"纸张自然落下"错位感，不失控 */
 .card:nth-of-type(10n + 1) { transform: rotate(-0.8deg); }
@@ -206,6 +212,9 @@ button {
   font-size: 14px;
   line-height: 1.9;
   color: var(--ink);
+  /* 长 URL / 代码 / 英文长 token 必须强制断行，否则单段撑破卡片 → 撑破整页 viewport */
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 .memo-body p { margin: 0 0 0.6em; }
 .memo-body p:last-child { margin-bottom: 0; }
@@ -464,6 +473,22 @@ button {
   background: rgba(var(--accent-rgb), 0.08);
   padding: 1px 6px;
   border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+.paper .body pre {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre;
+  background: rgba(var(--accent-rgb), 0.05);
+  padding: 12px 14px;
+  border-radius: 6px;
+  margin: 1em 0;
+}
+.paper .body pre code {
+  background: none;
+  padding: 0;
+  white-space: pre;
+  overflow-wrap: normal;
 }
 .paper .from {
   margin-top: 28px;
