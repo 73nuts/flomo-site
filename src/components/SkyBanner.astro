@@ -39,38 +39,45 @@ const initial = skyFromHour(new Date().getHours());
 </script>
 
 <style is:global>
+  /* sky 不是色块，是"纸张上方的一线光"。
+     所有时段共享同一种语言：低饱和米白基调 + 顶部一抹色温 + 快速向 body bg 收敛。
+     色温（warm↔cool）+ 明度 决定时段差异，而非色相 —— 让 5 个 accent 都能与之共存。 */
   #sky {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 360px;
+    height: 240px;
     pointer-events: none;
     transition: background 0.8s ease;
     z-index: 0;
   }
-  /* 底部柔和淡出到页面底色，让 sky 和内容无缝衔接 */
+  /* 底部柔和淡出到页面底色，强化"光"而非"色块" */
   #sky::after {
     content: '';
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 80px;
+    height: 96px;
     background: linear-gradient(to bottom, transparent, var(--bg-page));
     pointer-events: none;
   }
+  /* 晨光：偏冷的米白，清透 */
   #sky.morning {
-    background: linear-gradient(180deg, #fcd9b8 0%, #f8d1a8 22%, #f4e2cc 48%, #f5f1e9 78%);
+    background: linear-gradient(180deg, #f3eee5 0%, #f4ede0 22%, #f5efe5 50%, #f5f1e9 80%);
   }
+  /* 午后：暖意但极淡，让 jg 蜂蜜金不再撞 */
   #sky.afternoon {
-    background: linear-gradient(180deg, #f6e8c7 0%, #f3e2bc 25%, #f5ecd6 55%, #f5f1e9 85%);
+    background: linear-gradient(180deg, #faf2e2 0%, #f7eed8 22%, #f5efde 50%, #f5f1e9 80%);
   }
+  /* 黄昏：一抹粉橘水彩，不过 30% 即化入米白 */
   #sky.dusk {
-    background: linear-gradient(180deg, #e9b48c 0%, #e8a78a 20%, #d89a9a 40%, #c79aaa 62%, #a898b5 80%, #f5f1e9 100%);
+    background: linear-gradient(180deg, #f1ddcd 0%, #ecd1c8 20%, #e6d0d2 42%, #ddd2d4 62%, #f5f1e9 88%);
   }
+  /* 夜幕：保留戏剧性但调浅一档，避免压顶 */
   #sky.night {
-    background: linear-gradient(180deg, #242a3d 0%, #34374c 25%, #5a5266 50%, #9a8884 72%, #d4c5b8 88%, #f5f1e9 100%);
+    background: linear-gradient(180deg, #3a3e54 0%, #54546a 22%, #857685 50%, #c4b0a8 75%, #f5f1e9 96%);
   }
   /* 深夜彩蛋：00-04 点星空色 + 细碎星点 */
   #sky.midnight {
