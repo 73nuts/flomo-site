@@ -73,34 +73,36 @@ const initial = skyFromHour(new Date().getHours());
     background: linear-gradient(to bottom, transparent, var(--bg-page));
     pointer-events: none;
   }
-  /* 设计意图：暖色仅集中在顶部 0-18%，30% 以下快速过渡到 body bg。
-     双光斑透明度提至 0.65，让"光"成为视觉主体，linear gradient 退到底层做色调暗示。 */
+  /* 4 段统一原则：
+     · linear 走单色相系（同色相内由深→浅），不跨色相 → 不出 banding
+     · stop 间距均匀（25/25/25），避免局部密集堆叠
+     · radial 双光斑 transparent 80%，与 linear stop 错峰，过渡边界不重合
+     · 暖色集中顶部，最末段过渡到 body bg #f5f1e9 */
   #sky.morning {
     background:
-      radial-gradient(ellipse 90% 70% at 70% 0%, rgba(255, 200, 140, 0.65), transparent 60%),
-      radial-gradient(ellipse 70% 55% at 18% 0%, rgba(255, 180, 160, 0.4), transparent 65%),
-      linear-gradient(180deg, #fcd9b8 0%, #f8d1a8 18%, #f4e2cc 36%, #f5f1e9 65%);
+      radial-gradient(ellipse 90% 70% at 70% 0%, rgba(255, 200, 140, 0.6), transparent 80%),
+      radial-gradient(ellipse 70% 55% at 18% 0%, rgba(255, 180, 160, 0.38), transparent 80%),
+      linear-gradient(180deg, #fcd9b8 0%, #f6cfb0 25%, #f4dfca 50%, #f3e8d8 75%, #f5f1e9 95%);
   }
   #sky.afternoon {
     background:
-      radial-gradient(ellipse 90% 70% at 72% 0%, rgba(255, 220, 160, 0.65), transparent 60%),
-      radial-gradient(ellipse 70% 60% at 22% 0%, rgba(255, 210, 175, 0.42), transparent 65%),
-      linear-gradient(180deg, #f6e8c7 0%, #f3e2bc 18%, #f5ecd6 38%, #f5f1e9 70%);
+      radial-gradient(ellipse 90% 70% at 72% 0%, rgba(255, 220, 160, 0.6), transparent 80%),
+      radial-gradient(ellipse 70% 60% at 22% 0%, rgba(255, 210, 175, 0.4), transparent 80%),
+      linear-gradient(180deg, #f6e8c7 0%, #f1deb6 25%, #f2e3c9 50%, #f3ebd9 75%, #f5f1e9 95%);
   }
-  /* dusk 修：去掉冷紫 #c79aaa/#a898b5 这步色相急转（之前在 48-64% 形成横带），
-     改走单色相系暖橙→粉橘→米粉→米白；radial 衰减 60% → 80%，与 linear 错峰不撞 */
   #sky.dusk {
     background:
       radial-gradient(ellipse 90% 70% at 72% 0%, rgba(255, 175, 145, 0.6), transparent 80%),
       radial-gradient(ellipse 80% 60% at 22% 0%, rgba(220, 170, 180, 0.4), transparent 80%),
-      linear-gradient(180deg, #e9b48c 0%, #e2a89a 25%, #d8b4ad 50%, #ecdfd6 72%, #f5f1e9 92%);
+      linear-gradient(180deg, #e9b48c 0%, #e2a89a 25%, #d8b4ad 50%, #ecdfd6 75%, #f5f1e9 95%);
   }
-  /* 夜幕：右上微月晕 + 左上淡蓝霾，底层深蓝（调浅一档，不压顶）；70% 后即化入米白 */
+  /* 夜幕：5 段缩为 4 段，去掉中间冷紫 #6b6076 / 暖灰 #a89690 的色相急转。
+     蓝灰系单色相内深→浅过渡：深蓝 → 蓝紫灰 → 灰米 → 米白。 */
   #sky.night {
     background:
-      radial-gradient(ellipse 60% 45% at 78% 8%, rgba(255, 240, 215, 0.25), transparent 60%),
-      radial-gradient(ellipse 70% 55% at 18% 4%, rgba(180, 195, 220, 0.18), transparent 70%),
-      linear-gradient(180deg, #2a3148 0%, #3c3d54 18%, #6b6076 38%, #a89690 58%, #d4c5b8 78%, #f5f1e9 96%);
+      radial-gradient(ellipse 60% 45% at 78% 8%, rgba(255, 240, 215, 0.22), transparent 80%),
+      radial-gradient(ellipse 70% 55% at 18% 4%, rgba(180, 195, 220, 0.18), transparent 80%),
+      linear-gradient(180deg, #2a3148 0%, #4f4c66 28%, #8f8294 55%, #c8b9b3 80%, #f5f1e9 100%);
   }
   /* 深夜彩蛋：00-04 点星空色 + 细碎星点 */
   #sky.midnight {
