@@ -18,11 +18,12 @@ const initial = skyFromHour(new Date().getHours());
 
 <script is:inline>
   (function () {
+    /* 与 src/lib/sky.ts skyFromHour 严格对齐：
+       0-4 midnight / 5-10 morning / 11-16 afternoon / 17-19 dusk / 20-23 night */
     function mood(h) {
       if (h < 5) return 'midnight';
-      if (h < 6) return 'night';
       if (h < 11) return 'morning';
-      if (h < 16) return 'afternoon';
+      if (h < 17) return 'afternoon';
       if (h < 20) return 'dusk';
       return 'night';
     }
@@ -78,17 +79,21 @@ const initial = skyFromHour(new Date().getHours());
      · stop 间距均匀（25/25/25），避免局部密集堆叠
      · radial 双光斑 transparent 80%，与 linear stop 错峰，过渡边界不重合
      · 暖色集中顶部，最末段过渡到 body bg #f5f1e9 */
+  /* 晨光：清冷蓝紫余韵（夜未褪尽）+ 桃粉初阳 → 米白。
+     与 afternoon 拉开区分度的关键：顶部留一抹冷调蓝紫 #cfc7d8，初阳是桃粉 #ebcab8，
+     不和午后的纯金黄混淆。 */
   #sky.morning {
     background:
-      radial-gradient(ellipse 90% 70% at 70% 0%, rgba(255, 200, 140, 0.6), transparent 80%),
-      radial-gradient(ellipse 70% 55% at 18% 0%, rgba(255, 180, 160, 0.38), transparent 80%),
-      linear-gradient(180deg, #fcd9b8 0%, #f6cfb0 25%, #f4dfca 50%, #f3e8d8 75%, #f5f1e9 95%);
+      radial-gradient(ellipse 90% 70% at 70% 0%, rgba(255, 200, 145, 0.55), transparent 78%),
+      radial-gradient(ellipse 70% 55% at 18% 4%, rgba(180, 165, 200, 0.4), transparent 80%),
+      linear-gradient(180deg, #cfc7d8 0%, #ebcab8 22%, #f4d9c4 48%, #f5e8db 72%, #f5f1e9 94%);
   }
+  /* 午后：明亮金黄、高饱和阳光感。比 morning 更黄、更亮、更"烈"。 */
   #sky.afternoon {
     background:
-      radial-gradient(ellipse 90% 70% at 72% 0%, rgba(255, 220, 160, 0.6), transparent 80%),
-      radial-gradient(ellipse 70% 60% at 22% 0%, rgba(255, 210, 175, 0.4), transparent 80%),
-      linear-gradient(180deg, #f6e8c7 0%, #f1deb6 25%, #f2e3c9 50%, #f3ebd9 75%, #f5f1e9 95%);
+      radial-gradient(ellipse 95% 72% at 72% 0%, rgba(255, 215, 130, 0.7), transparent 78%),
+      radial-gradient(ellipse 70% 60% at 22% 0%, rgba(255, 200, 150, 0.45), transparent 80%),
+      linear-gradient(180deg, #f5d68a 0%, #f4cd80 22%, #f6daa4 48%, #f3e6c8 72%, #f5f1e9 94%);
   }
   #sky.dusk {
     background:
@@ -115,7 +120,9 @@ const initial = skyFromHour(new Date().getHours());
       radial-gradient(1px 1px at 89% 18%, rgba(255, 255, 255, 0.75) 50%, transparent 51%),
       radial-gradient(1px 1px at 18% 55%, rgba(255, 255, 255, 0.6) 50%, transparent 51%),
       radial-gradient(1.5px 1.5px at 72% 52%, rgba(255, 255, 255, 0.8) 50%, transparent 51%),
-      linear-gradient(180deg, #0c1230 0%, #1b1f45 22%, #2e2c58 44%, #58456a 64%, #8d6d7a 80%, #c4a798 90%, #f5f1e9 100%);
+      /* 7 段缩为 6 段，stop 间距均匀（0/25/50/70/85/100），
+         去掉 80-90% 三站挤一起的陡过渡，深蓝→紫灰→暖米→米白线性过渡更自然 */
+      linear-gradient(180deg, #0c1230 0%, #1a2150 25%, #36325c 50%, #6c5876 70%, #a8908a 85%, #f5f1e9 100%);
   }
   #sky.midnight::before {
     content: '';
