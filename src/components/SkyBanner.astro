@@ -88,12 +88,14 @@ const initial = skyFromHour(new Date().getHours());
       radial-gradient(ellipse 70% 55% at 18% 4%, rgba(180, 165, 200, 0.4), transparent 80%),
       linear-gradient(180deg, #cfc7d8 0%, #ebcab8 22%, #f4d9c4 48%, #f5e8db 72%, #f5f1e9 94%);
   }
-  /* 午后：明亮金黄、高饱和阳光感。比 morning 更黄、更亮、更"烈"。 */
+  /* 午后：底色是温润奶油米黄（不是塑料纯黄），顶部正中一团聚焦高光做"日中阳光"
+     —— 比 morning 更亮但同样不浓重。区分度由顶部高光位置 + 底色冷暖差承担，
+     不用整体加深 linear。 */
   #sky.afternoon {
     background:
-      radial-gradient(ellipse 95% 72% at 72% 0%, rgba(255, 215, 130, 0.7), transparent 78%),
-      radial-gradient(ellipse 70% 60% at 22% 0%, rgba(255, 200, 150, 0.45), transparent 80%),
-      linear-gradient(180deg, #f5d68a 0%, #f4cd80 22%, #f6daa4 48%, #f3e6c8 72%, #f5f1e9 94%);
+      radial-gradient(ellipse 60% 45% at 50% 8%, rgba(255, 232, 180, 0.55), transparent 70%),
+      radial-gradient(ellipse 80% 55% at 78% 0%, rgba(255, 210, 160, 0.32), transparent 78%),
+      linear-gradient(180deg, #f5e8c8 0%, #f2e1be 22%, #f4ead0 48%, #f3ebda 72%, #f5f1e9 94%);
   }
   #sky.dusk {
     background:
