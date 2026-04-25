@@ -26,10 +26,13 @@ const initial = skyFromHour(new Date().getHours());
       if (h < 20) return 'dusk';
       return 'night';
     }
+    var MOODS = ['midnight', 'night', 'morning', 'afternoon', 'dusk'];
     function apply() {
       var el = document.getElementById('sky');
       if (!el) return;
-      el.className = 'sky ' + mood(new Date().getHours());
+      // 用 classList 增删而非整段重写，避免吞掉 .on（fadeIn 类）导致每分钟闪一次
+      MOODS.forEach(function (m) { el.classList.remove(m); });
+      el.classList.add(mood(new Date().getHours()));
     }
     function fadeIn() {
       var el = document.getElementById('sky');
@@ -52,7 +55,7 @@ const initial = skyFromHour(new Date().getHours());
     top: 0;
     left: 0;
     right: 0;
-    height: 320px;
+    height: 260px;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.6s cubic-bezier(0.2, 0.6, 0.2, 1), background 0.8s ease;
@@ -66,37 +69,36 @@ const initial = skyFromHour(new Date().getHours());
     left: 0;
     right: 0;
     bottom: 0;
-    height: 96px;
+    height: 110px;
     background: linear-gradient(to bottom, transparent, var(--bg-page));
     pointer-events: none;
   }
-  /* 晨光：右上一团暖橙光斑 + 左上一团粉光，底层暖橙渐变 */
+  /* 设计意图：暖色仅集中在顶部 0-18%，30% 以下快速过渡到 body bg。
+     双光斑透明度提至 0.65，让"光"成为视觉主体，linear gradient 退到底层做色调暗示。 */
   #sky.morning {
     background:
-      radial-gradient(ellipse 90% 70% at 70% 0%, rgba(255, 200, 140, 0.55), transparent 65%),
-      radial-gradient(ellipse 70% 55% at 18% 0%, rgba(255, 180, 160, 0.32), transparent 70%),
-      linear-gradient(180deg, #fcd9b8 0%, #f8d1a8 22%, #f4e2cc 48%, #f5f1e9 78%);
+      radial-gradient(ellipse 90% 70% at 70% 0%, rgba(255, 200, 140, 0.65), transparent 60%),
+      radial-gradient(ellipse 70% 55% at 18% 0%, rgba(255, 180, 160, 0.4), transparent 65%),
+      linear-gradient(180deg, #fcd9b8 0%, #f8d1a8 18%, #f4e2cc 36%, #f5f1e9 65%);
   }
-  /* 午后：金黄高光斑 + 浅暖左斑，底层暖金渐变 */
   #sky.afternoon {
     background:
-      radial-gradient(ellipse 90% 70% at 72% 0%, rgba(255, 220, 160, 0.5), transparent 65%),
-      radial-gradient(ellipse 70% 60% at 22% 0%, rgba(255, 210, 175, 0.32), transparent 70%),
-      linear-gradient(180deg, #f6e8c7 0%, #f3e2bc 25%, #f5ecd6 55%, #f5f1e9 85%);
+      radial-gradient(ellipse 90% 70% at 72% 0%, rgba(255, 220, 160, 0.65), transparent 60%),
+      radial-gradient(ellipse 70% 60% at 22% 0%, rgba(255, 210, 175, 0.42), transparent 65%),
+      linear-gradient(180deg, #f6e8c7 0%, #f3e2bc 18%, #f5ecd6 38%, #f5f1e9 70%);
   }
-  /* 黄昏：橙红日落光斑 + 紫粉补色，底层 5 段晕染 */
   #sky.dusk {
     background:
-      radial-gradient(ellipse 90% 70% at 72% 0%, rgba(255, 175, 145, 0.55), transparent 65%),
-      radial-gradient(ellipse 80% 60% at 22% 0%, rgba(210, 160, 180, 0.4), transparent 70%),
-      linear-gradient(180deg, #e9b48c 0%, #e8a78a 20%, #d89a9a 40%, #c79aaa 62%, #a898b5 80%, #f5f1e9 100%);
+      radial-gradient(ellipse 90% 70% at 72% 0%, rgba(255, 175, 145, 0.62), transparent 60%),
+      radial-gradient(ellipse 80% 60% at 22% 0%, rgba(210, 160, 180, 0.45), transparent 65%),
+      linear-gradient(180deg, #e9b48c 0%, #e8a78a 16%, #d89a9a 32%, #c79aaa 48%, #a898b5 64%, #f5f1e9 88%);
   }
-  /* 夜幕：右上一轮微月光晕 + 左上淡蓝霾，底层深蓝过渡 */
+  /* 夜幕：右上微月晕 + 左上淡蓝霾，底层深蓝（调浅一档，不压顶）；70% 后即化入米白 */
   #sky.night {
     background:
-      radial-gradient(ellipse 60% 45% at 78% 8%, rgba(255, 240, 215, 0.18), transparent 60%),
-      radial-gradient(ellipse 70% 55% at 18% 4%, rgba(180, 195, 220, 0.14), transparent 70%),
-      linear-gradient(180deg, #242a3d 0%, #34374c 25%, #5a5266 50%, #9a8884 72%, #d4c5b8 88%, #f5f1e9 100%);
+      radial-gradient(ellipse 60% 45% at 78% 8%, rgba(255, 240, 215, 0.25), transparent 60%),
+      radial-gradient(ellipse 70% 55% at 18% 4%, rgba(180, 195, 220, 0.18), transparent 70%),
+      linear-gradient(180deg, #2a3148 0%, #3c3d54 18%, #6b6076 38%, #a89690 58%, #d4c5b8 78%, #f5f1e9 96%);
   }
   /* 深夜彩蛋：00-04 点星空色 + 细碎星点 */
   #sky.midnight {
