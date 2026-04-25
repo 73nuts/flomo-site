@@ -87,11 +87,13 @@ const initial = skyFromHour(new Date().getHours());
       radial-gradient(ellipse 70% 60% at 22% 0%, rgba(255, 210, 175, 0.42), transparent 65%),
       linear-gradient(180deg, #f6e8c7 0%, #f3e2bc 18%, #f5ecd6 38%, #f5f1e9 70%);
   }
+  /* dusk 修：去掉冷紫 #c79aaa/#a898b5 这步色相急转（之前在 48-64% 形成横带），
+     改走单色相系暖橙→粉橘→米粉→米白；radial 衰减 60% → 80%，与 linear 错峰不撞 */
   #sky.dusk {
     background:
-      radial-gradient(ellipse 90% 70% at 72% 0%, rgba(255, 175, 145, 0.62), transparent 60%),
-      radial-gradient(ellipse 80% 60% at 22% 0%, rgba(210, 160, 180, 0.45), transparent 65%),
-      linear-gradient(180deg, #e9b48c 0%, #e8a78a 16%, #d89a9a 32%, #c79aaa 48%, #a898b5 64%, #f5f1e9 88%);
+      radial-gradient(ellipse 90% 70% at 72% 0%, rgba(255, 175, 145, 0.6), transparent 80%),
+      radial-gradient(ellipse 80% 60% at 22% 0%, rgba(220, 170, 180, 0.4), transparent 80%),
+      linear-gradient(180deg, #e9b48c 0%, #e2a89a 25%, #d8b4ad 50%, #ecdfd6 72%, #f5f1e9 92%);
   }
   /* 夜幕：右上微月晕 + 左上淡蓝霾，底层深蓝（调浅一档，不压顶）；70% 后即化入米白 */
   #sky.night {
