@@ -1,20 +1,26 @@
 ---
 /**
- * 顶部一笔天色。根据访问时设备本地小时切换 morning / afternoon / dusk / night。
+ * 顶部一笔天色 —— 纸本山水（Ink Wash Mountains）。
  *
- * 为什么不是 svelte 岛屿：
- *   之前用 <SkyBanner client:only="svelte" /> 在 mobile Chrome 下出现了 .sky 宽度
- *   被 astro-island 包装元素限制的 bug（只渲染左半屏，右侧留白）。
- *   改用 Astro 组件 + is:inline 脚本：div 在服务端就渲染，
- *   客户端只负责根据当前时间更新 class，定位不受任何包装层影响。
+ * 灵感：宋人山水（范宽 / 马远）/《富春山居图》/ 杉本博司《海景》。
+ * 每段 sky 都嵌入同一道远山 SVG 轮廓（远 + 近双层 path），山色与天色随时段
+ * 协同切换。中文随笔站独家方向。
+ *
+ * 不是 svelte 岛屿：之前 client:only="svelte" 在 mobile Chrome 出现 .sky
+ * 宽度被 astro-island 包装元素限制（只渲染左半屏）。改用 Astro 组件 +
+ * is:inline 脚本，div 在服务端就渲染，客户端只更新时段 class 与 fade-in。
  */
 import { skyFromHour } from '~/lib/sky';
 
-// 服务端静态渲染取不到访客的时间；先用 afternoon 兜底，客户端立即覆盖。
 const initial = skyFromHour(new Date().getHours());
 ---
 
-<div id="sky" class={`sky ${initial}`}></div>
+<div id="sky" class={`sky ${initial}`}>
+  <svg class="mountains" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <path class="mtn-far" d="M0,72 L10,62 L22,68 L32,55 L46,64 L60,52 L72,62 L86,55 L100,66 L100,100 L0,100 Z"/>
+    <path class="mtn-near" d="M0,82 L8,76 L18,80 L28,72 L42,80 L54,72 L68,82 L82,75 L100,82 L100,100 L0,100 Z"/>
+  </svg>
+</div>
 
 <script is:inline>
   (function () {
@@ -31,7 +37,6 @@ const initial = skyFromHour(new Date().getHours());
     function apply() {
       var el = document.getElementById('sky');
       if (!el) return;
-      // 用 classList 增删而非整段重写，避免吞掉 .on（fadeIn 类）导致每分钟闪一次
       MOODS.forEach(function (m) { el.classList.remove(m); });
       el.classList.add(mood(new Date().getHours()));
     }
@@ -42,28 +47,25 @@ const initial = skyFromHour(new Date().getHours());
     apply();
     fadeIn();
     setInterval(apply, 60 * 1000);
-    // Astro 视图过渡切页后重新挂元素，需要再 apply 一次
     document.addEventListener('astro:page-load', function () { apply(); fadeIn(); });
   })();
 </script>
 
 <style is:global>
-  /* sky = "晨光透窗"。来自 v2-good-taste 设计稿 mobile-delights 的 radial 双光斑构造：
-     时段配色（linear gradient 底层）保留原稿 4 段高饱和色相 + 顶部叠两团光斑，
-     让纯色带升级为"有方向的光"。opacity 0→1 淡入也来自原稿 .sky.on 切换。 */
+  /* 容器：fixed 顶部一线天 */
   #sky {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 260px;
+    height: 280px;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.6s cubic-bezier(0.2, 0.6, 0.2, 1), background 0.8s ease;
     z-index: 0;
   }
   #sky.on { opacity: 1; }
-  /* 底部柔和淡出到页面底色，让 sky 和内容无缝衔接 */
+  /* 底部柔和淡出到页面底色 */
   #sky::after {
     content: '';
     position: absolute;
@@ -73,65 +75,79 @@ const initial = skyFromHour(new Date().getHours());
     height: 110px;
     background: linear-gradient(to bottom, transparent, var(--bg-page));
     pointer-events: none;
+    z-index: 2;
   }
-  /* 4 段统一原则：
-     · linear 走单色相系（同色相内由深→浅），不跨色相 → 不出 banding
-     · stop 间距均匀（25/25/25），避免局部密集堆叠
-     · radial 双光斑 transparent 80%，与 linear stop 错峰，过渡边界不重合
-     · 暖色集中顶部，最末段过渡到 body bg #f5f1e9 */
-  /* 晨光：清冷蓝紫余韵（夜未褪尽）+ 桃粉初阳 → 米白。
-     与 afternoon 拉开区分度的关键：顶部留一抹冷调蓝紫 #cfc7d8，初阳是桃粉 #ebcab8，
-     不和午后的纯金黄混淆。 */
-  #sky.morning {
-    background:
-      radial-gradient(ellipse 90% 70% at 70% 0%, rgba(255, 200, 145, 0.55), transparent 78%),
-      radial-gradient(ellipse 70% 55% at 18% 4%, rgba(180, 165, 200, 0.4), transparent 80%),
-      linear-gradient(180deg, #cfc7d8 0%, #ebcab8 22%, #f4d9c4 48%, #f5e8db 72%, #f5f1e9 94%);
-  }
-  /* 午后：底色是温润奶油米黄（不是塑料纯黄），顶部正中一团聚焦高光做"日中阳光"
-     —— 比 morning 更亮但同样不浓重。区分度由顶部高光位置 + 底色冷暖差承担，
-     不用整体加深 linear。 */
-  #sky.afternoon {
-    background:
-      radial-gradient(ellipse 60% 45% at 50% 8%, rgba(255, 232, 180, 0.55), transparent 70%),
-      radial-gradient(ellipse 80% 55% at 78% 0%, rgba(255, 210, 160, 0.32), transparent 78%),
-      linear-gradient(180deg, #f5e8c8 0%, #f2e1be 22%, #f4ead0 48%, #f3ebda 72%, #f5f1e9 94%);
-  }
-  #sky.dusk {
-    background:
-      radial-gradient(ellipse 90% 70% at 72% 0%, rgba(255, 175, 145, 0.6), transparent 80%),
-      radial-gradient(ellipse 80% 60% at 22% 0%, rgba(220, 170, 180, 0.4), transparent 80%),
-      linear-gradient(180deg, #e9b48c 0%, #e2a89a 25%, #d8b4ad 50%, #ecdfd6 75%, #f5f1e9 95%);
-  }
-  /* 夜幕：5 段缩为 4 段，去掉中间冷紫 #6b6076 / 暖灰 #a89690 的色相急转。
-     蓝灰系单色相内深→浅过渡：深蓝 → 蓝紫灰 → 灰米 → 米白。 */
-  #sky.night {
-    background:
-      radial-gradient(ellipse 60% 45% at 78% 8%, rgba(255, 240, 215, 0.22), transparent 80%),
-      radial-gradient(ellipse 70% 55% at 18% 4%, rgba(180, 195, 220, 0.18), transparent 80%),
-      linear-gradient(180deg, #2a3148 0%, #4f4c66 28%, #8f8294 55%, #c8b9b3 80%, #f5f1e9 100%);
-  }
-  /* 深夜彩蛋：00-04 点星空色 + 细碎星点 */
-  #sky.midnight {
-    background:
-      radial-gradient(1.5px 1.5px at 12% 18%, rgba(255, 255, 255, 0.9) 50%, transparent 51%),
-      radial-gradient(1px 1px at 28% 42%, rgba(255, 255, 255, 0.75) 50%, transparent 51%),
-      radial-gradient(1.5px 1.5px at 48% 22%, rgba(255, 255, 255, 0.85) 50%, transparent 51%),
-      radial-gradient(1px 1px at 63% 12%, rgba(255, 255, 255, 0.7) 50%, transparent 51%),
-      radial-gradient(1.5px 1.5px at 78% 36%, rgba(255, 255, 255, 0.9) 50%, transparent 51%),
-      radial-gradient(1px 1px at 89% 18%, rgba(255, 255, 255, 0.75) 50%, transparent 51%),
-      radial-gradient(1px 1px at 18% 55%, rgba(255, 255, 255, 0.6) 50%, transparent 51%),
-      radial-gradient(1.5px 1.5px at 72% 52%, rgba(255, 255, 255, 0.8) 50%, transparent 51%),
-      /* 7 段缩为 6 段，stop 间距均匀（0/25/50/70/85/100），
-         去掉 80-90% 三站挤一起的陡过渡，深蓝→紫灰→暖米→米白线性过渡更自然 */
-      linear-gradient(180deg, #0c1230 0%, #1a2150 25%, #36325c 50%, #6c5876 70%, #a8908a 85%, #f5f1e9 100%);
-  }
-  #sky.midnight::before {
-    content: '';
+  /* 远山 SVG：固定形状、占满 sky 容器，山色与浓淡走 CSS variable */
+  #sky .mountains {
     position: absolute;
     inset: 0;
-    background:
-      radial-gradient(circle at 82% 14%, rgba(255, 248, 220, 0.95) 0%, rgba(255, 248, 220, 0.95) 2%, rgba(255, 248, 220, 0) 3.5%);
+    width: 100%;
+    height: 100%;
     pointer-events: none;
+    z-index: 1;
+  }
+  #sky .mountains .mtn-far  { fill: var(--mtn-far,  #a8b4c0); opacity: var(--mtn-far-op,  0.32); }
+  #sky .mountains .mtn-near { fill: var(--mtn-near, #7c8896); opacity: var(--mtn-near-op, 0.45); }
+
+  /* ============================================================
+     5 段时段：天色 + 山色 协同变化。
+     - morning   雾里隐青：淡蓝灰天 + 远山若隐若现
+     - afternoon 青翠分明：淡米青天 + 山轮廓清晰
+     - dusk      逆光剪影：暖橙天 + 落日 + 山墨黑
+     - night     山溶墨蓝：深蓝天 + 月在山上 + 散星
+     - midnight  墨浓如黑：极深紫蓝天 + 满月 + 8 颗星（R13 彩蛋意象保留）
+     ============================================================ */
+  #sky.morning {
+    --mtn-far:  #a8b4c0;
+    --mtn-far-op:  0.32;
+    --mtn-near: #7c8896;
+    --mtn-near-op: 0.45;
+    background: linear-gradient(180deg, #cfd2dd 0%, #e0d8d0 38%, #efe6dc 65%, #f5f1e9 92%);
+  }
+  #sky.afternoon {
+    --mtn-far:  #9aa89a;
+    --mtn-far-op:  0.45;
+    --mtn-near: #5e6f5d;
+    --mtn-near-op: 0.6;
+    background: linear-gradient(180deg, #d8e1dc 0%, #e8e5d4 40%, #efece0 65%, #f5f1e9 92%);
+  }
+  #sky.dusk {
+    --mtn-far:  #7a4030;
+    --mtn-far-op:  0.55;
+    --mtn-near: #3a2018;
+    --mtn-near-op: 0.78;
+    background:
+      radial-gradient(circle 32px at 75% 72px, rgba(220, 135, 85, 0.65), transparent 70%),
+      linear-gradient(180deg, #e8b890 0%, #d8a4a0 30%, #e0c8c0 60%, #f5f1e9 92%);
+  }
+  #sky.night {
+    --mtn-far:  #1c2438;
+    --mtn-far-op:  0.7;
+    --mtn-near: #0c1024;
+    --mtn-near-op: 0.88;
+    background:
+      radial-gradient(circle 12px at 25% 28px, rgba(245, 235, 210, 0.92) 60%, rgba(245, 235, 210, 0) 80%),
+      radial-gradient(circle 28px at 25% 28px, rgba(245, 235, 210, 0.18), transparent 70%),
+      radial-gradient(1px 1px at 50% 20%, rgba(255, 255, 255, 0.4) 50%, transparent 51%),
+      radial-gradient(1px 1px at 70% 38%, rgba(255, 255, 255, 0.45) 50%, transparent 51%),
+      linear-gradient(180deg, #2a3148 0%, #545068 35%, #c8b9b3 78%, #f5f1e9 100%);
+  }
+  /* 深夜彩蛋（R13 锁定）：满月 + 8 颗星点 + 极深紫蓝 + 山墨浓如黑 */
+  #sky.midnight {
+    --mtn-far:  #0a0e22;
+    --mtn-far-op:  0.82;
+    --mtn-near: #040614;
+    --mtn-near-op: 0.95;
+    background:
+      radial-gradient(circle 14px at 75% 36px, rgba(255, 250, 225, 0.95) 60%, rgba(255, 250, 225, 0) 85%),
+      radial-gradient(circle 40px at 75% 36px, rgba(255, 250, 225, 0.18), transparent 70%),
+      radial-gradient(1.5px 1.5px at 14% 18%, rgba(255, 255, 255, 0.9) 50%, transparent 51%),
+      radial-gradient(1px 1px at 30% 32%, rgba(255, 255, 255, 0.7) 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 48% 18%, rgba(255, 255, 255, 0.85) 50%, transparent 51%),
+      radial-gradient(1px 1px at 60% 38%, rgba(255, 255, 255, 0.6) 50%, transparent 51%),
+      radial-gradient(1px 1px at 88% 14%, rgba(255, 255, 255, 0.7) 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 22% 50%, rgba(255, 255, 255, 0.55) 50%, transparent 51%),
+      radial-gradient(1px 1px at 42% 56%, rgba(255, 255, 255, 0.5) 50%, transparent 51%),
+      linear-gradient(180deg, #0c1230 0%, #1a2150 28%, #36325c 58%, #6c5876 78%, #a8908a 92%, #f5f1e9 100%);
   }
 </style>
