@@ -41,31 +41,21 @@ if (e.key === 'ArrowLeft' && prevHref) navigate(prevHref);
 
 ## 功能扩展
 
-### [P1] vault 长文导入
+### [部分完成] vault 长文导入
 
-**待引入的两篇**：
-- `/Users/curtis/vault/大教堂与赌场.md`
-- `/Users/curtis/vault/TACO 交易的自反性悖论.md`
+**临时方案已上线**：两篇 vault 长文以 `source: vault` + `title` 字段塞进 jg 列表卡：
+- `src/content/memos/jg/essay-cathedral-and-casino.md` ✓
+- `src/content/memos/jg/essay-taco-reflexivity.md` ✓
+- 列表卡通过 `LongMemo.svelte` 折叠展示摘要，点开走完整阅读页（`.paper`，已套用 R15 手札体排版）
 
-**问题**：这些是**系统化长文**，不适合塞进现有 5 个碎片 tab（flomo 的短随笔格式）。
+**长期决策仍 pending**：是否抽出独立 collection？
 
-**候选方案**：
+候选方向（如要做再讨论）：
+1. **独立 collection `essays`**（最干净）：新 `src/content/essays/*.md` + `src/pages/essays/...`，入口页加第 6 个"长文"入口
+2. **第 6 个 tab**：影响入口页 5 张便签布局
+3. **根目录 `/essays/<slug>`**：不作为 tab，超链接访问
 
-1. **独立 collection `essays`**（最干净）：
-   - 新 `src/content/essays/*.md`
-   - 新 `src/pages/essays/index.astro` + `src/pages/essays/[slug].astro`
-   - 入口页加第 6 个"长文"入口或独立区域
-   - 需要简单 frontmatter：title / date / description / tags
-
-2. **第 6 个 tab「观察」**：
-   - 现有 `TabId` enum 加一项
-   - 影响入口页 5 张便签布局，需要重新调整网格
-   - 长文和短文在同一 UI 下不协调
-
-3. **根目录独立页 `/essays/<slug>`**：
-   - 不作为 tab，只作为超链接或从首页底部入口访问
-
-**推荐方案 1**。工作量：~1 小时。等用户确认方向后做。
+短期看放在 jg 没问题（已用 R15 手札体阅读页排版）；长文累积到 5 篇以上再考虑分离。
 
 ---
 
@@ -138,3 +128,25 @@ if (e.key === 'ArrowLeft' && prevHref) navigate(prevHref);
 （首次线上访问后记录你实际观察到的问题到这里）
 
 - [ ] ……
+
+---
+
+## 最近完成（DONE）
+
+### [DONE 2026-04-26] Typography 落定 = 笔记本派 + 手札体
+
+`09b7e6c` + `7f005a2`。列表卡走"笔记本派"（14.5/1.85），阅读页走"手札体"（H1-H4 用 Ma Shan Zheng 楷书 / H2 黑色 6×22 小竖块 / ol 中文数字 / hr 28px 短横）。完整规则锁死在 DESIGN_RULES.md **R15**。
+
+### [DONE 2026-04-26] Sky = 纸本山水
+
+`7287dea` + 多次迭代 (`56eb810` `92abcc1`)。`<div id="sky">` 内嵌 inline SVG（远 + 近双层山轮廓 path），山色由 4 个 CSS variables 切换。完整规则锁死在 DESIGN_RULES.md **R14**。
+
+历经 5 次方向迭代（暖纸光斑 / 低饱和米白 / 三联日间 / 单色相 + 光斑 / 纸本山水），最终定稿。踩坑结论已固化。
+
+### [DONE 2026-04-25] 列表页横向溢出修复
+
+`210a9e8`。vault 长文含 JS 代码 / 长 URL 撑破 viewport，移动端浏览器自动按内容缩放。修法：`body { overflow-x: clip }` + `.card { min-width: 0; max-width: 100% }` + `.memo-body { overflow-wrap: anywhere }` 三件套兜底。
+
+### [DONE 2026-04-25] 项目级 CLAUDE.md
+
+`aa77c90`。给未来 Claude Code 会话固化的项目知识：架构 6 块大图 / DESIGN_RULES R1-R15 摘要 / CF 缓存绕法 / commit 风格。

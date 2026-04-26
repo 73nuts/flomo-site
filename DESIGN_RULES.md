@@ -186,4 +186,67 @@
 
 ---
 
+## R14 · Sky 设计 = 纸本山水（2026-04-26 锁定）
+
+**规则**：`SkyBanner.astro` 是顶部的"远山"装饰，**5 段时段共用同一道 SVG 远山轮廓 + 由 CSS variables 切山色**。灵感：宋人山水（范宽 / 马远）/《富春山居图》/ 杉本博司《海景》。
+
+**结构**：
+- `<div id="sky">` 内嵌 inline SVG（远山 + 近山两条 path）
+- 山色由 4 个 CSS variables 驱动：`--mtn-far` / `--mtn-far-op` / `--mtn-near` / `--mtn-near-op`
+- 5 段 mood class 各自切换这 4 个变量 + 调整背景 gradient（含落日 / 月 / 星等具象元素）
+
+**5 段视觉策略**：
+| 时段 | 特征 |
+|---|---|
+| morning | 雾里隐青：淡蓝灰天 + 远山若隐若现 |
+| afternoon | 青翠分明：淡米青天 + 山轮廓清晰 |
+| dusk | 逆光剪影：暖橙天 + 落日 + 山墨黑 |
+| night | 月在山上：深蓝天 + 左侧月亮 + 散星 + 山墨蓝 |
+| midnight | 墨浓如黑（R13 彩蛋）：极深紫蓝 + 满月 + 8 颗星 + 山近黑 |
+
+**禁止**（之前迭代踩过的坑）：
+- ❌ 5 段都用单色相暖橙/暖金底色 → "看起来一样"
+- ❌ 整段 linear-gradient 调成 `#f5d68a` 等纯金黄 → 塑料感
+- ❌ 6 段以上 linear-gradient 强行跨色相（如 `#c79aaa → #a898b5` 冷紫急转）→ 出 banding 横带
+- ❌ radial 衰减 `transparent 60%` 与 linear stop 撞同一带 → 撞色 banding
+- ❌ `apply()` 用 `el.className = 'sky ' + mood` 重写整段 className → 吞掉 fadeIn 的 `.on` 类，每分钟闪一下。**必须用 `classList.remove(...)/add(...)` 单独操作时段类**
+- ❌ 把 SkyBanner 改回 svelte 岛屿（R6 锁定，历史 mobile bug）
+
+**契约维护**：`mood()` inline JS 与 `src/lib/sky.ts skyFromHour` 是两份代码（inline script 不能 import TS），靠注释 `与 src/lib/sky.ts skyFromHour 严格对齐` 维护契约。
+
+时段表：`0-4 midnight / 5-10 morning / 11-16 afternoon / 17-19 dusk / 20-23 night`。
+
+---
+
+## R15 · Typography = 笔记本派 + 手札体（2026-04-26 锁定）
+
+**两层排版语言分工**：
+
+**列表卡 `.memo-body` —— 笔记本派**（内敛 / 古典 / 像 Bear、Day One）：
+- font-size 14.5px / line-height 1.85 / letter-spacing 0.015em
+- p margin 1em
+- ul `·` 18px 4px-left（不用 `•`）
+- strong = accent 色单线下划
+
+**阅读页 `.paper .body` —— 手札体**（"汪曾祺手札"感 / 楷字标题）：
+- font-size 16.5px / line-height 1.92 / letter-spacing 0.025em
+- H1 / H2 / H3 / H4 全部用 `var(--hand)` **Ma Shan Zheng 楷书**（不是 ZCOOL）
+- H2 用 `::before` 6×22 黑色实心小竖块替代 accent 色条
+- ul 黑色 4px 圆点（不用 accent）
+- ol 用 CSS counter `cjk-ideographic`「一、二、三、」中文数字
+- hr 28px 单根短横居中
+- blockquote 去 italic（中文 italic 丑），1px ink-soft 单线
+- `.essay-title` 用 `var(--hand)` 楷书 30px / weight 400 / letter 0.06em
+
+**字族分工**：列表卡标题用 `--brush` ZCOOL XiaoWei（篆刻感）；阅读页所有标题用 `--hand` Ma Shan Zheng（手抄感）。卡是预览，札是手抄 —— 两层视觉语言不同字族。
+
+**禁止**：
+- 列表卡和阅读页混用同一套字号 / 行高（必须分层：卡 = 摘要密度 / 读 = 沉浸密度）
+- 给 `.essay-title` 加印章、装饰元素（用户已明确否决）
+- 阅读页 H2 回退到 accent 色 left-border（已被黑色竖块取代）
+
+**日期格式契约**：列表 + 阅读页 + meta 全部走 `fmtDate(iso)` → `Apr 24, 2026`。改格式动 `src/lib/date.ts` 一处。
+
+---
+
 改动这里的规则前，先和用户确认。规则先于代码。

@@ -50,25 +50,25 @@ pnpm check            # astro check (TypeScript + Astro 诊断)
 
 `R11` 锁定显示名和 accent 配色 —— 不能改 id（`deleted.txt` 和已分享 URL 全失效），也不能把 gd 显示名改回"灌点鸭汤"（源目录名 vs 展示名是两回事）。
 
-### 4. Sky 设计语言（已迭代多版，规则锁定）
+### 4. Sky 设计语言 = 纸本山水（R14 锁定）
 
-`SkyBanner.astro` 是顶部装饰 banner —— **5 段时段 + 月山星**。
+`SkyBanner.astro` 顶部装饰 banner，当前方向 **纸本山水**（commit `7287dea`，灵感：宋人山水 / 富春山居图 / 杉本博司）：`<div id="sky">` 内嵌 inline SVG（远山 + 近山两条 path），山色由 4 个 CSS variables (`--mtn-far`, `--mtn-far-op`, `--mtn-near`, `--mtn-near-op`) 驱动，5 段切换变量、SVG path 共用一份。完整规则与全部踩坑见 **DESIGN_RULES.md R14**。
 
-**当前方向：纸本山水**（commit `7287dea`，灵感：宋人山水 / 富春山居图 / 杉本博司）。结构是 `<div id="sky">` + 内嵌 inline SVG（远山 + 近山两条 path），山色用 4 个 CSS variables (`--mtn-far`, `--mtn-far-op`, `--mtn-near`, `--mtn-near-op`) 驱动，5 段切换变量、SVG path 共用一份。
+时段表：`0-4 midnight / 5-10 morning / 11-16 afternoon / 17-19 dusk / 20-23 night`。`mood()` inline JS 必须与 `src/lib/sky.ts skyFromHour` 严格对齐（两份代码无法共享，靠注释维护契约）。`midnight` 是 R13 彩蛋（满月 + 8 颗星 + 山墨浓如黑），意象不能去掉。
 
-**踩坑结论（不要重蹈）**：
+### 5. Typography 设计语言 = 笔记本派 + 手札体（R15 锁定）
 
-- ❌ 5 段都用单色相暖橙/暖金 → 会"看起来一样"
-- ❌ afternoon 调成 `#f5d68a` 纯金黄 → 塑料感、土气
-- ❌ 6+ 段 linear-gradient 强行跨色相（如冷紫 #c79aaa → #a898b5）→ 出 banding 横带
-- ❌ radial 衰减 `transparent 60%` 与 linear stop 撞同一带 → 撞色 banding
-- ❌ `apply()` 用 `el.className = 'sky ' + mood` 重写整段 → 吞掉 fadeIn 的 `.on` 类，每分钟闪一下
-- ✅ 用 `classList.remove(...)/add(...)` 单独操作时段类
-- ✅ `mood()` inline JS 必须与 `src/lib/sky.ts skyFromHour` **严格对齐**（两份代码无法共享，靠注释维护契约）
+两层排版语言分工：
 
-时段表（最新）：`0-4 midnight / 5-10 morning / 11-16 afternoon / 17-19 dusk / 20-23 night`。`midnight` 是 R13 锁定的彩蛋（满月 + 8 颗星），意象不能去掉。
+- **列表卡 `.memo-body`** = 笔记本派（内敛 / 古典 / 像 Bear、Day One）：14.5px / 1.85 / 字距 0.015em / p margin 1em / ul `·` 18px / strong = accent 色单线下划
+- **阅读页 `.paper .body`** = 手札体（"汪曾祺手札"感）：16.5px / 1.92 / H1-H4 全部用 `var(--hand)` **Ma Shan Zheng 楷书** / H2 用 6×22 黑色实心小竖块（替代 accent 色条）/ ol 用 CSS counter `cjk-ideographic`「一、二、三、」中文数字 / hr 28px 单根短横居中 / blockquote 去 italic
+- **`.essay-title`** 用 `var(--hand)` 楷书 30px / weight 400 / letter 0.06em，**不加印章**
 
-### 5. CSS 横向溢出兜底
+字族分工：列表卡标题 `--brush` ZCOOL XiaoWei（篆刻感）/ 阅读页所有标题 `--hand` Ma Shan Zheng（手抄感）。日期格式契约：所有显示走 `fmtDate(iso)` → `Apr 24, 2026`，改格式动 `src/lib/date.ts` 一处。
+
+完整规则与历史否决方向见 **DESIGN_RULES.md R15**。
+
+### 6. CSS 横向溢出兜底
 
 `theme.css` 有三处必须保留的兜底，防止 vault 长文（含代码块 / 长 URL / 英文长 token）撑破 viewport 导致移动端浏览器自动缩放：
 
@@ -80,7 +80,7 @@ body { overflow-x: clip; }           /* viewport 兜底，比 hidden 不影响 s
 
 加阅读页 `.paper .body pre` 的 `overflow-x: auto`。这套修复见 commit `210a9e8`。
 
-## 设计规则 (DESIGN_RULES.md, R1-R13)
+## 设计规则 (DESIGN_RULES.md, R1-R15)
 
 **改这些规则前先和用户确认。规则先于代码。** 摘要：
 
@@ -97,6 +97,8 @@ body { overflow-x: clip; }           /* viewport 兜底，比 hidden 不影响 s
 - **R11** 5 个 tab 顺序与 accent 配色锁定；**禁止改 id 或把 gd 改回"灌点鸭汤"**
 - **R12** 移动端优先，`@media (min-width:1024px)` 渐进增强
 - **R13** 5 个彩蛋清单：midnight 星空 / VisitCounter ≥10 次 / EndMark 终字 / 头像连点 10 次烟花 / DevTools console ASCII。**禁止 emoji、禁止 `filter: drop-shadow`、禁止 canvas 粒子**（之前踩过）
+- **R14** Sky = 纸本山水（远山 SVG + 5 段山色协同 + 月落日星）。**禁止**：单色相暖橙底色平铺 / `#f5d68a` 纯金黄 / 6+ 段强行跨色相 / `el.className` 重写吞掉 `.on` 类
+- **R15** Typography：列表卡 = 笔记本派（14.5/1.85/字距 0.015em） · 阅读页 = 手札体（16.5/1.92/Ma Shan Zheng 楷书 H1-H4 / H2 黑色 6×22 小竖块 / ol 中文数字 / hr 28px 短横）。**禁止**给 `.essay-title` 加印章 / 阅读页 H2 回退 accent left-border / 列表卡和阅读页混用同字号
 
 ## 部署 + 缓存
 
