@@ -37,8 +37,15 @@ const initial = skyFromHour(new Date().getHours());
     function apply() {
       var el = document.getElementById('sky');
       if (!el) return;
-      MOODS.forEach(function (m) { el.classList.remove(m); });
-      el.classList.add(mood(new Date().getHours()));
+      var m = mood(new Date().getHours());
+      MOODS.forEach(function (mm) {
+        el.classList.remove(mm);
+        if (document.body) document.body.classList.remove('mood-' + mm);
+      });
+      el.classList.add(m);
+      /* 同步给 body 一份 mood class，让 .topbar / .month-sep 等
+         sky 之外的元素能按时段切文字色（暗色 sky 下文字反白可读）。 */
+      if (document.body) document.body.classList.add('mood-' + m);
     }
     function fadeIn() {
       var el = document.getElementById('sky');

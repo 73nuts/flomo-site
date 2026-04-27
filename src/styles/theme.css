@@ -241,7 +241,12 @@ button {
   border-bottom: 1px solid rgba(var(--accent-rgb), 0.55);
 }
 
-/* 顶栏 */
+/* 顶栏 ——
+   完全透明，**禁用 backdrop-filter** 与 mask-image：之前的 blur(6px) saturate(120%)
+   会在 sky banner 顶部 ~80px 一整条拍出磨砂玻璃，把月星山对比度全部打掉。
+   文字可读性改靠 text-shadow + body.mood-* 自适应色实现：
+   - 默认（亮色 sky 时段）：文字 ink，浅米色 text-shadow
+   - body.mood-midnight / mood-night（暗色 sky）：文字 cosmic latte 米色 + 深色 shadow */
 .topbar {
   position: sticky;
   top: 0;
@@ -250,13 +255,13 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 60px 20px 12px;
-  /* 透明背景让 sky 色透过；轻微毛玻璃保证深色 sky 下文字可读 */
   background: transparent;
-  backdrop-filter: blur(6px) saturate(120%);
-  -webkit-backdrop-filter: blur(6px) saturate(120%);
-  /* 下沿细过渡：滚过 sky 后依然有层次 */
-  mask-image: linear-gradient(to bottom, #000 70%, rgba(0,0,0,0.85));
-  -webkit-mask-image: linear-gradient(to bottom, #000 70%, rgba(0,0,0,0.85));
+}
+.topbar .back,
+.topbar .title,
+.topbar .cnt {
+  text-shadow: 0 1px 1px rgba(255, 248, 231, 0.7), 0 0 8px rgba(255, 248, 231, 0.5);
+  transition: color 0.5s ease, text-shadow 0.5s ease;
 }
 .topbar .back {
   font-family: var(--sans);
@@ -281,6 +286,18 @@ button {
   letter-spacing: 0.15em;
   color: var(--muted);
   font-feature-settings: 'tnum';
+}
+/* 暗色 sky 段：文字反白成 Cosmic Latte 米色 + 深色 text-shadow，
+   让"返回 / 标题 / N 则"在深紫蓝夜空 / 墨蓝夜空上读得清。
+   body.mood-* class 由 SkyBanner.astro inline script 注入。 */
+body.mood-midnight .topbar .back,
+body.mood-midnight .topbar .title,
+body.mood-midnight .topbar .cnt,
+body.mood-night .topbar .back,
+body.mood-night .topbar .title,
+body.mood-night .topbar .cnt {
+  color: rgba(255, 248, 231, 0.92);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 0, 0, 0.35);
 }
 
 /* 居中阅读栏 */
