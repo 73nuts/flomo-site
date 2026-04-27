@@ -86,6 +86,7 @@ flomo-site/
 | `pnpm build` | 生产构建到 `dist/` |
 | `pnpm preview` | 预览生产构建 |
 | `pnpm sync` | 从 `FLOMO_SYNC_DIR` 拉 flomo HTML 生成 md |
+| `pnpm new` | 交互式写一条 `source: manual` 新笔记（不走 flomo） |
 | `pnpm check` | 类型 + Astro 诊断 |
 
 ---

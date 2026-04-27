@@ -9,6 +9,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "sync": "bun run scripts/sync.ts",
+    "new": "bun run scripts/new.ts",
     "check": "astro check",
     "astro": "astro"
   },

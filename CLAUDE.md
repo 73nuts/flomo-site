@@ -56,6 +56,7 @@ pnpm dev              # 本地开发 (默认 4321)
 pnpm build            # 生产构建到 dist/ (~43MB, 大头是字体)
 pnpm preview          # 预览生产构建
 pnpm sync             # bun 跑 scripts/sync.ts，从 FLOMO_SYNC_DIR 拉 flomo HTML 生成 .md
+pnpm new              # 交互式新建一条 source: manual 笔记（选 tab → 自动 id → 进 $EDITOR 写正文）
 pnpm check            # astro check (TypeScript + Astro 诊断)
 ```
 
@@ -85,7 +86,7 @@ pnpm check            # astro check (TypeScript + Astro 诊断)
 
 **删除保护**：`data/deleted.txt` 每行 `<tab>/<id>`，sync 时永久跳过。这条机制是**自动同步上线的前置条件** —— 没有它，删过的隐私条目会被 flomo 重新导出拉回来。
 
-**已知风险（见 TODO.md）**：当前 `id = ${tab}${index}`，flomo 删一条后续 id 全 shift。`yyyymmdd-hhmmss` 是稳定方案，必须在做自动同步之前迁移。
+**id 稳定方案（已落地）**：memo id = `yyyymmdd-hhmmss`（如 `20260116-182134`），来源是 flomo 原始时间戳。删一条 flomo 笔记不会让其他 id shift，已分享的 URL 稳定。`scripts/sync.ts` 第 9-13 行有契约注释。
 
 ### 3. 5 个 tab —— 单一真源
 

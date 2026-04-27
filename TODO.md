@@ -85,23 +85,9 @@ if (e.key === 'ArrowLeft' && prevHref) navigate(prevHref);
 
 ---
 
-### [P2] ID 稳定性
+### [DONE] ID 稳定性
 
-**现状**：memo id = `${tab}${索引}`（如 `jg0`、`jg1`、`jg2`...），索引 = flomo HTML 里 `.memo` 的数组位置。
-
-**风险**：若 flomo 侧删除了一条 memo 再导出，后续所有 id 会 shift。比如原来的 `jg42` 变成了 `jg41`，导致：
-- `data/deleted.txt` 里记的跳过 id 失效
-- 已分享的 URL 指向不同内容
-- git diff 噪音极大（746 条 md 文件全部重写）
-
-**方案**：改 id 为 `${yyyymmdd}-${hhmmss}`（基于 flomo 原始 time 字段），例如 `20260116-182134`。天然稳定，无序列依赖。
-
-**代价**：
-- 需要改 `sync.ts` 输出逻辑 + 文件名
-- 已存在的 746 个 md 文件需要全部迁移（git 上会显示大量 rename）
-- URL 会变（当前未公开部署，影响面小）
-
-**建议时机**：在做自动同步之前做这个，否则后续问题更大。
+memo id 已落到 `yyyymmdd-hhmmss` 格式（如 `20260116-182134`），来自 flomo 原始时间戳。`scripts/sync.ts` 第 9-13 行有契约注释。flomo 删一条不再让其他 id shift，`deleted.txt` 与已分享 URL 都稳定。**自动同步的前置条件已就绪。**
 
 ---
 
