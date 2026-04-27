@@ -68,9 +68,9 @@ const counts = Object.fromEntries(
       flex-direction: column;
       gap: 14px;
       z-index: 30;
-      background: rgba(255, 255, 255, 0.28);
-      backdrop-filter: blur(14px) saturate(120%);
-      -webkit-backdrop-filter: blur(14px) saturate(120%);
+      /* 桌面端便签架：纯米色不透明，禁用 backdrop-filter（它在 sky 左半边
+         会糊出毛玻璃条，破坏纸本山水清晰度）。 */
+      background: var(--bg-page);
       border-right: 1px solid rgba(42, 36, 30, 0.06);
     }
 

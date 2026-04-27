@@ -152,9 +152,7 @@
     left: 0;
     right: 0;
     height: 60px;
-    background: rgba(250, 246, 238, 0.96);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+    background: var(--bg-page, #f5f1e9);
     border-bottom: 1px solid rgba(31, 29, 26, 0.12);
     z-index: 200;
     will-change: transform;
