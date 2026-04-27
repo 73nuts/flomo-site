@@ -144,7 +144,10 @@ button {
   /* 跟随 topbar 实际高度 sticky，否则 month-sep 落在 topbar 内部撞色带 */
   top: var(--topbar-h, 94px);
   z-index: 12;
-  background: transparent;
+  /* bg 不透明度跟 --scroll-progress 走（0..1）：滚到 sky 底部前透明，
+     之后逐渐变 0.96 米色挡住下方卡片。SkyBanner.astro inline JS 注入。 */
+  background: rgba(245, 241, 233, calc(var(--scroll-progress, 0) * 0.96));
+  transition: background 0.18s ease, border-color 0.18s ease;
 }
 .month-sep:first-of-type {
   margin-top: 28px;
@@ -172,18 +175,18 @@ button {
   background: var(--line-soft);
   transition: background 0.5s ease;
 }
-/* 暗色 sky 段（且未滚动）：月份文字反白成 Cosmic Latte 米色 + 深色 text-shadow，
-   分隔线改用半透明米色，让"三月 / MAR 2026"在深紫蓝夜空上读得清。
-   :not(.scrolled) 限定 —— 滚动时被下方 body.scrolled 规则覆盖。 */
-body.mood-midnight:not(.scrolled) .month-sep .cn,
-body.mood-midnight:not(.scrolled) .month-sep .en,
-body.mood-night:not(.scrolled) .month-sep .cn,
-body.mood-night:not(.scrolled) .month-sep .en {
+/* 暗色 sky 段（且未触达滚动文字阈值）：月份文字反白成 Cosmic Latte 米色 +
+   深色 text-shadow，分隔线改用半透明米色，让"三月 / MAR 2026"在深紫蓝夜空上读得清。
+   :not(.scrolled-text) 限定 —— 进度过半（0.5）后米色 bg 主导，文字回到 ink。 */
+body.mood-midnight:not(.scrolled-text) .month-sep .cn,
+body.mood-midnight:not(.scrolled-text) .month-sep .en,
+body.mood-night:not(.scrolled-text) .month-sep .cn,
+body.mood-night:not(.scrolled-text) .month-sep .en {
   color: rgba(255, 248, 231, 0.88);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 0, 0, 0.35);
 }
-body.mood-midnight:not(.scrolled) .month-sep .rule,
-body.mood-night:not(.scrolled) .month-sep .rule {
+body.mood-midnight:not(.scrolled-text) .month-sep .rule,
+body.mood-night:not(.scrolled-text) .month-sep .rule {
   background: rgba(255, 248, 231, 0.18);
 }
 
@@ -287,7 +290,10 @@ body.mood-night:not(.scrolled) .month-sep .rule {
   align-items: center;
   justify-content: space-between;
   padding: 60px 20px 12px;
-  background: transparent;
+  /* bg 不透明度跟 --scroll-progress 走：未滚动透明（sky 完整可见），
+     滚到 sky 底部 (240px) 时 0.96 米色不透明（彻底挡卡片）。 */
+  background: rgba(245, 241, 233, calc(var(--scroll-progress, 0) * 0.96));
+  transition: background 0.18s ease;
 }
 .topbar .back,
 .topbar .title,
@@ -319,44 +325,38 @@ body.mood-night:not(.scrolled) .month-sep .rule {
   color: var(--muted);
   font-feature-settings: 'tnum';
 }
-/* 暗色 sky 段（且未滚动）：文字反白成 Cosmic Latte 米色 + 深色 text-shadow，
-   让"返回 / 标题 / N 则"在深紫蓝夜空 / 墨蓝夜空上读得清。
-   body.mood-* + body.scrolled 由 SkyBanner.astro inline script 注入。
-   :not(.scrolled) 限定 —— 滚动时被下方 body.scrolled 规则覆盖。 */
-body.mood-midnight:not(.scrolled) .topbar .back,
-body.mood-midnight:not(.scrolled) .topbar .title,
-body.mood-midnight:not(.scrolled) .topbar .cnt,
-body.mood-night:not(.scrolled) .topbar .back,
-body.mood-night:not(.scrolled) .topbar .title,
-body.mood-night:not(.scrolled) .topbar .cnt {
+/* 暗色 sky 段（且未触达滚动文字阈值 progress 0.5）：文字反白成 Cosmic Latte
+   米色 + 深色 text-shadow。body.scrolled-text 在 progress >= 0.5 时由 inline JS 注入。 */
+body.mood-midnight:not(.scrolled-text) .topbar .back,
+body.mood-midnight:not(.scrolled-text) .topbar .title,
+body.mood-midnight:not(.scrolled-text) .topbar .cnt,
+body.mood-night:not(.scrolled-text) .topbar .back,
+body.mood-night:not(.scrolled-text) .topbar .title,
+body.mood-night:not(.scrolled-text) .topbar .cnt {
   color: rgba(255, 248, 231, 0.92);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 0, 0, 0.35);
 }
 
-/* 滚动时：topbar / month-sep 给一层 opaque 米色挡住下方滚动卡片，
-   防止透明态下卡片透过来视觉混乱（用户反馈"滑动时全都累在一起"）。
-   滚动时背景已是 paper，跟 sky 无关，所以也把暗色 mood 的反白文字盖回 ink。
-   transition 让阈值跨越（scrollY=8）时 bg/color 平滑切换。 */
-body.scrolled .topbar,
-body.scrolled .month-sep {
-  background: rgba(245, 241, 233, 0.96);
+/* 滚动 progress >= 0.5（米色 bg 主导）：文字回到默认 ink + 清掉 text-shadow，
+   分隔线回 default。bg opacity 通过 calc(var(--scroll-progress)*0.96) 连续渐变，
+   不在这里写 background。border-bottom 也跟随 progress 渐显。 */
+body.scrolled-text .topbar,
+body.scrolled-text .month-sep {
   border-bottom: 1px solid rgba(42, 36, 30, 0.06);
-  transition: background 0.3s ease, border-color 0.3s ease;
 }
-body.scrolled .topbar .back,
-body.scrolled .topbar .title,
-body.scrolled .topbar .cnt,
-body.scrolled .month-sep .cn,
-body.scrolled .month-sep .en {
+body.scrolled-text .topbar .back,
+body.scrolled-text .topbar .title,
+body.scrolled-text .topbar .cnt,
+body.scrolled-text .month-sep .cn,
+body.scrolled-text .month-sep .en {
   text-shadow: none;
 }
-/* 各元素恢复默认色（覆盖 mood- 反白） */
-body.scrolled .topbar .back  { color: var(--ink-soft); }
-body.scrolled .topbar .title { color: var(--ink); }
-body.scrolled .topbar .cnt   { color: var(--muted); }
-body.scrolled .month-sep .cn { color: var(--ink-soft); }
-body.scrolled .month-sep .en { color: var(--muted-2); }
-body.scrolled .month-sep .rule { background: var(--line-soft); }
+body.scrolled-text .topbar .back  { color: var(--ink-soft); }
+body.scrolled-text .topbar .title { color: var(--ink); }
+body.scrolled-text .topbar .cnt   { color: var(--muted); }
+body.scrolled-text .month-sep .cn { color: var(--ink-soft); }
+body.scrolled-text .month-sep .en { color: var(--muted-2); }
+body.scrolled-text .month-sep .rule { background: var(--line-soft); }
 
 /* 居中阅读栏 */
 .reading {

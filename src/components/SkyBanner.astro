@@ -51,25 +51,33 @@ const initial = skyFromHour(new Date().getHours());
       var el = document.getElementById('sky');
       if (el) requestAnimationFrame(function () { el.classList.add('on'); });
     }
-    /* 滚动状态同步给 body —— 不滚动时 topbar/month-sep 透明（让 sky 透出来），
-       滚动时给它们 opaque bg（防止下方卡片透过来视觉混乱）。 */
-    function updateScrolled() {
+    /* 滚动连续渐变给 body：scrollY 0..240 → --scroll-progress 0..1。
+       topbar/month-sep 的 bg opacity 跟它走 —— 不滚动时透明（sky 完整可见），
+       滚到 sky 底部 (240px) 时才到 96% 不透明（彻底挡住下方滑过的卡片）。
+       中间任何点都是半透明：sky 还能透出来一点，卡片也开始被挡住。
+       binary .scrolled-text 在 progress >= 0.5 时切换文字色（避免米黄文字盖在
+       米色 bg 上看不见）。 */
+    var SKY_FADE_MAX = 240;
+    function updateScroll() {
       if (!document.body) return;
-      if (window.scrollY > 8) {
-        document.body.classList.add('scrolled');
+      var y = window.scrollY || 0;
+      var progress = y < 0 ? 0 : (y > SKY_FADE_MAX ? 1 : y / SKY_FADE_MAX);
+      document.body.style.setProperty('--scroll-progress', progress);
+      if (progress >= 0.5) {
+        document.body.classList.add('scrolled-text');
       } else {
-        document.body.classList.remove('scrolled');
+        document.body.classList.remove('scrolled-text');
       }
     }
     apply();
     fadeIn();
-    updateScrolled();
+    updateScroll();
     setInterval(apply, 60 * 1000);
-    window.addEventListener('scroll', updateScrolled, { passive: true });
+    window.addEventListener('scroll', updateScroll, { passive: true });
     document.addEventListener('astro:page-load', function () {
       apply();
       fadeIn();
-      updateScrolled();
+      updateScroll();
     });
   })();
 </script>
