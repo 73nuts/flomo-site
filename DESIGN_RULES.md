@@ -98,18 +98,31 @@
 
 ---
 
-## R4 · 顶部双层固定
+## R4 · 顶部架构 = 八大留白（2026-04-27 锁定）
 
-**规则**：列表页顶部：
-1. **Sky banner** `#sky`：`position: fixed; top: 0; height: 360px`，随系统时间 morning/afternoon/dusk/night 切换
-2. **Topbar**（返回 / 标题 / 计数）：`position: sticky; top: 0; z-index: 20`，背景 transparent + backdrop-filter blur，让 sky 色透过
-3. **Month 分隔符**：`position: sticky; top: 54px`，滚动时贴住 topbar 下沿
+> 灵感锚点：**八大山人**《荷石栖禽》/ **倪瓒**「一河两岸」/ **马远**「马一角」—— 极简构图，留白是主体，墨是配角。sky 永远在顶部一角，下面是大片纸；分隔不是色带，是一道墨线"水岸"。
 
-**三层视觉层级（从顶到底）**：sky → topbar → month-sep → 卡片流。
+**规则**：列表页顶部三层结构：
+
+1. **Sky banner** `#sky`：`position: sticky; top: 0; height: 240px; z-index: 10`，随系统时间 5 段切换（morning / afternoon / dusk / night / midnight）。比原 280 短 40px，"少天多纸"留白精神，但 R14 5 段山色 + R13 子时 8 颗 Cosmic Latte 星 + 满月 + 山墨黑全部保留。底部 64px 自然 fade-to-paper（"水岸"过渡）。
+2. **Topbar**（返回 / 标题 / 计数）：`position: fixed; top: 0; left: 0; right: 0; z-index: 30`，**背景永远透明**，文字反白叠在 sky 上（`body.mood-midnight/-night` 时 cosmic latte 米色 + 深色 shadow；其他段 ink 黑 + 浅米 shadow）。@media min-width:1024px 时 `left: 240px` 让出 sidebar。
+3. **水岸墨线** `.shore`：`position: sticky; top: 240px; z-index: 25; height: 0`，伪元素 `::before` 在 sky 下沿一道**两端淡入、中间 22% 不透明**的横墨线，永远是天与月份的分界。
+4. **Month 分隔符** `.month-sep`：`position: static`（不再 sticky），`background: transparent`（不再有 paper 米色 calc 渐变）。只是「三月 — MAR 2026」+ 28px 短横，**纸本元素而非 UI 色带**。
+
+**三层视觉层级（从上到下，z-index）**：topbar (30) → shore (25) → sky (10) → 卡片流（z-auto，被 sky 覆盖在重叠区）。
+
+**滚动行为**：保留 native body 滚动 ——
+- sky `position: sticky` 钉在 viewport 顶 0..240，永远可见
+- topbar `position: fixed` 永远在 viewport 顶 0..~111
+- 卡片在 sky 下方 native flow 滚动；卡片向上移动到 sky 区域时被 sky 自然覆盖（z-index 10 > 卡片 z-auto）
+- 不做内 scroll 容器 → PullSearch / 浏览器 scroll-restoration / iOS pull-to-refresh 全部保留
 
 **禁止**：
-- sky 改 absolute（会随滚动消失）
-- topbar 背景纯色（遮挡 sky 色彩）
+- sky 改回 `position: fixed`（容易跟 sidebar / topbar 打架）
+- 给 topbar / month-sep 加任何 paper 色 calc 渐变（"米色墙挡住 sky" 是被否决的方案）
+- 给 month-sep 加 sticky bg（违反"纸本短横不是色带"）
+- 用 `--scroll-progress` / `body.scrolled-text` 控制顶部颜色渐变（已废弃）
+- 把 sky 高度改回 280（"少天多纸"留白契约）或缩到 200 以下（R13/R14 8 颗星 + 满月会挤压失真）
 
 ---
 

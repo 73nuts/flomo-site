@@ -116,11 +116,17 @@ pnpm check            # astro check (TypeScript + Astro 诊断)
 
 `R11` 锁定显示名和 accent 配色 —— 不能改 id（`deleted.txt` 和已分享 URL 全失效），也不能把 gd 显示名改回"灌点鸭汤"（源目录名 vs 展示名是两回事）。
 
-### 4. Sky 设计语言 = 纸本山水（R14 锁定）
+### 4. Sky 设计语言 = 纸本山水 + 八大留白架构（R14 + R4 锁定）
 
-`SkyBanner.astro` 顶部装饰 banner，当前方向 **纸本山水**（commit `7287dea`，灵感：宋人山水 / 富春山居图 / 杉本博司）：`<div id="sky">` 内嵌 inline SVG（远山 + 近山两条 path），山色由 4 个 CSS variables (`--mtn-far`, `--mtn-far-op`, `--mtn-near`, `--mtn-near-op`) 驱动，5 段切换变量、SVG path 共用一份。完整规则与全部踩坑见 **DESIGN_RULES.md R14**。
+`SkyBanner.astro` 顶部装饰 banner，画面方向 **纸本山水**（R14，灵感：宋人山水 / 富春山居图 / 杉本博司），架构方向 **八大留白**（R4 重写于 2026-04-27，灵感：八大山人 / 倪瓒「一河两岸」/ 马远「一角」）：
 
-时段表：`0-4 midnight / 5-10 morning / 11-16 afternoon / 17-19 dusk / 20-23 night`。`mood()` inline JS 必须与 `src/lib/sky.ts skyFromHour` 严格对齐（两份代码无法共享，靠注释维护契约）。`midnight` 是 R13 彩蛋（满月 + 8 颗星 + 山墨浓如黑），意象不能去掉。
+**画面契约 (R14)**：`<div id="sky">` 内嵌 inline SVG（远山 + 近山两条 path），山色由 4 个 CSS variables 驱动，5 段切换变量、SVG path 共用一份。midnight 段是 R13 彩蛋（满月 + 8 颗 Cosmic Latte 星 + 山墨浓如黑）。完整规则见 **DESIGN_RULES.md R14**。
+
+**架构契约 (R4)**：sky `position: sticky; top: 0; height: 240px`（比原 280 短 40，"少天多纸"），永远在 viewport 顶部一角不动；topbar `position: fixed; top: 0`，**永远透明背景**，文字反白叠在 sky 上；水岸墨线 `.shore` `position: sticky; top: 240px` 一道两端淡入、中间 22% 不透明的横墨线作为天与月份的分界；month-sep `position: static; background: transparent`，是纸本短横不是色带。保留 native body 滚动 → PullSearch / scroll-restoration / iOS pull-to-refresh 不动。完整契约见 **DESIGN_RULES.md R4**。
+
+**已废弃的机制（不要回退）**：`--scroll-progress` / `body.scrolled-text` / `topbar bg: rgba(paper, calc(progress * 0.96))` —— 这是 R4 之前的"米色墙渐变挡 sky" 路线，会把 sky 完全盖住；八大留白方案已彻底替换。
+
+时段表：`0-4 midnight / 5-10 morning / 11-16 afternoon / 17-19 dusk / 20-23 night`。`mood()` inline JS 必须与 `src/lib/sky.ts skyFromHour` 严格对齐（两份代码无法共享，靠注释维护契约）。
 
 ### 5. Typography 设计语言 = 笔记本派 + 手札体（R15 锁定）
 

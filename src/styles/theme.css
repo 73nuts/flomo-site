@@ -131,31 +131,18 @@ button {
   background: rgba(var(--accent-rgb, 138, 130, 114), 0.1);
 }
 
-/* 月份分隔符 —— 滚动时贴住顶栏下沿。
-   完全透明，**禁用 backdrop-filter** —— 同 .topbar 的修法，否则在 sky 上糊。
-   文字与分隔线靠 text-shadow + body.mood-* 自适应色保证读得清。 */
+/* 月份分隔符 —— 八大留白架构（R4）：纸本短横不是色带。
+   不再 sticky，不再 paper bg；纯纸面 inline 流过。
+   文字色直接 ink-soft / muted-2，无需反白（已经在 paper 区域内）。 */
 .month-sep {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 10px;
   padding: 10px 4px 8px;
   margin-top: 18px;
-  position: sticky;
-  /* 跟随 topbar 实际高度 sticky，否则 month-sep 落在 topbar 内部撞色带 */
-  top: var(--topbar-h, 94px);
-  z-index: 12;
-  /* bg 不透明度跟 --scroll-progress 走（0..1）：滚到 sky 底部前透明，
-     之后逐渐变 0.96 米色挡住下方卡片。SkyBanner.astro inline JS 注入。 */
-  background: rgba(245, 241, 233, calc(var(--scroll-progress, 0) * 0.96));
-  transition: background 0.18s ease, border-color 0.18s ease;
 }
 .month-sep:first-of-type {
-  margin-top: 28px;
-}
-.month-sep .cn,
-.month-sep .en {
-  text-shadow: 0 1px 1px rgba(255, 248, 231, 0.7), 0 0 8px rgba(255, 248, 231, 0.5);
-  transition: color 0.5s ease, text-shadow 0.5s ease;
+  margin-top: 8px;
 }
 .month-sep .cn {
   font-family: var(--brush);
@@ -173,21 +160,40 @@ button {
   flex: 1;
   height: 1px;
   background: var(--line-soft);
-  transition: background 0.5s ease;
+  align-self: center;
 }
-/* 暗色 sky 段（且未触达滚动文字阈值）：月份文字反白成 Cosmic Latte 米色 +
-   深色 text-shadow，分隔线改用半透明米色，让"三月 / MAR 2026"在深紫蓝夜空上读得清。
-   :not(.scrolled-text) 限定 —— 进度过半（0.5）后米色 bg 主导，文字回到 ink。 */
-body.mood-midnight:not(.scrolled-text) .month-sep .cn,
-body.mood-midnight:not(.scrolled-text) .month-sep .en,
-body.mood-night:not(.scrolled-text) .month-sep .cn,
-body.mood-night:not(.scrolled-text) .month-sep .en {
-  color: rgba(255, 248, 231, 0.88);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 0, 0, 0.35);
+
+/* 水岸墨线 —— 八大留白「一河两岸」。sticky 在 sky 下沿（240px）位置，
+   伪元素画一道两端淡入、中间 22% 不透明的横墨线，是天与月份的分界。
+   不是 1px 满线（那会变成"色带"），而是渐变的"水岸笔意"。 */
+.shore {
+  position: sticky;
+  top: 240px;
+  z-index: 25;
+  height: 0;
+  pointer-events: none;
 }
-body.mood-midnight:not(.scrolled-text) .month-sep .rule,
-body.mood-night:not(.scrolled-text) .month-sep .rule {
-  background: rgba(255, 248, 231, 0.18);
+.shore::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(42, 36, 30, 0.18) 22%,
+    rgba(42, 36, 30, 0.18) 78%,
+    transparent 100%
+  );
+}
+@media (min-width: 1024px) {
+  .shore {
+    /* 桌面端 left:240 sidebar 已让出，墨线落在主内容区 */
+    left: 0;
+    right: 0;
+  }
 }
 
 /* 卡片通用（便签风）*/
@@ -276,28 +282,27 @@ body.mood-night:not(.scrolled-text) .month-sep .rule {
   border-bottom: 1px solid rgba(var(--accent-rgb), 0.55);
 }
 
-/* 顶栏 ——
-   完全透明，**禁用 backdrop-filter** 与 mask-image：之前的 blur(6px) saturate(120%)
-   会在 sky banner 顶部 ~80px 一整条拍出磨砂玻璃，把月星山对比度全部打掉。
-   文字可读性改靠 text-shadow + body.mood-* 自适应色实现：
-   - 默认（亮色 sky 时段）：文字 ink，浅米色 text-shadow
-   - body.mood-midnight / mood-night（暗色 sky）：文字 cosmic latte 米色 + 深色 shadow */
+/* 顶栏 —— 八大留白架构（R4）：position fixed 永远在 viewport 顶部，
+   背景永远透明，文字直接叠在 sky 上（按时段反白/正写）。
+   不再有 sticky / paper bg / scroll-progress calc / scrolled-text 任何渐变。
+   桌面端 ≥1024px 时 left:240 让出 sidebar，避免 topbar 跨过 sidebar 区域。 */
 .topbar {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 20;
+  left: 0;
+  right: 0;
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 60px 20px 12px;
-  /* bg 不透明度跟 --scroll-progress 走：未滚动透明（sky 完整可见），
-     滚到 sky 底部 (240px) 时 0.96 米色不透明（彻底挡卡片）。 */
-  background: rgba(245, 241, 233, calc(var(--scroll-progress, 0) * 0.96));
-  transition: background 0.18s ease;
+  background: transparent;
+  pointer-events: none;
 }
 .topbar .back,
 .topbar .title,
 .topbar .cnt {
+  pointer-events: auto;
   text-shadow: 0 1px 1px rgba(255, 248, 231, 0.7), 0 0 8px rgba(255, 248, 231, 0.5);
   transition: color 0.5s ease, text-shadow 0.5s ease;
 }
@@ -325,38 +330,19 @@ body.mood-night:not(.scrolled-text) .month-sep .rule {
   color: var(--muted);
   font-feature-settings: 'tnum';
 }
-/* 暗色 sky 段（且未触达滚动文字阈值 progress 0.5）：文字反白成 Cosmic Latte
-   米色 + 深色 text-shadow。body.scrolled-text 在 progress >= 0.5 时由 inline JS 注入。 */
-body.mood-midnight:not(.scrolled-text) .topbar .back,
-body.mood-midnight:not(.scrolled-text) .topbar .title,
-body.mood-midnight:not(.scrolled-text) .topbar .cnt,
-body.mood-night:not(.scrolled-text) .topbar .back,
-body.mood-night:not(.scrolled-text) .topbar .title,
-body.mood-night:not(.scrolled-text) .topbar .cnt {
+/* 暗色 sky 段：topbar 文字反白成 Cosmic Latte 米色 + 深色 text-shadow，
+   保证"返回 / 阿鸭情话 / 210 则"在深紫蓝夜空 sky 上读得清。
+   `body.mood-*` 由 SkyBanner.astro inline JS 按时段注入。八大留白架构下 sky 永远在顶，
+   topbar 永远透明叠在 sky 上 —— 文字色就只取决于时段，不再受 scroll progress 影响。 */
+body.mood-midnight .topbar .back,
+body.mood-midnight .topbar .title,
+body.mood-midnight .topbar .cnt,
+body.mood-night .topbar .back,
+body.mood-night .topbar .title,
+body.mood-night .topbar .cnt {
   color: rgba(255, 248, 231, 0.92);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 0, 0, 0.35);
 }
-
-/* 滚动 progress >= 0.5（米色 bg 主导）：文字回到默认 ink + 清掉 text-shadow，
-   分隔线回 default。bg opacity 通过 calc(var(--scroll-progress)*0.96) 连续渐变，
-   不在这里写 background。border-bottom 也跟随 progress 渐显。 */
-body.scrolled-text .topbar,
-body.scrolled-text .month-sep {
-  border-bottom: 1px solid rgba(42, 36, 30, 0.06);
-}
-body.scrolled-text .topbar .back,
-body.scrolled-text .topbar .title,
-body.scrolled-text .topbar .cnt,
-body.scrolled-text .month-sep .cn,
-body.scrolled-text .month-sep .en {
-  text-shadow: none;
-}
-body.scrolled-text .topbar .back  { color: var(--ink-soft); }
-body.scrolled-text .topbar .title { color: var(--ink); }
-body.scrolled-text .topbar .cnt   { color: var(--muted); }
-body.scrolled-text .month-sep .cn { color: var(--ink-soft); }
-body.scrolled-text .month-sep .en { color: var(--muted-2); }
-body.scrolled-text .month-sep .rule { background: var(--line-soft); }
 
 /* 居中阅读栏 */
 .reading {
@@ -378,14 +364,16 @@ body.scrolled-text .month-sep .rule { background: var(--line-soft); }
   .screen.has-sidebar {
     margin-left: 240px;
   }
+  /* topbar 是 position:fixed 全屏顶部，桌面要让出 sidebar 240px 宽，否则 topbar 跨过 sidebar */
+  .screen.has-sidebar ~ .topbar,
   .screen.has-sidebar .topbar {
+    left: 240px;
     padding: 32px 40px 12px;
   }
   .screen.has-sidebar .reading {
     max-width: 720px;
     padding: 0 40px 120px;
   }
-  /* .month-sep top 由 :root --topbar-h 媒体查询统一管理（66px on desktop），不再写死 */
 }
 
 /* 阅读纸面 */
