@@ -1,0 +1,390 @@
+---
+/**
+ * /find —— "找一句"页面。
+ *
+ * - 顶部短一截 SkyBanner（与 tab 列表页一致的纸本山水）
+ * - input 用宣纸落笔横线样式，placeholder "记得是什么？"
+ * - 客户端 fetch /find-index.json 后纯字符串 includes 匹配
+ * - 命中卡复用列表卡视觉，命中词 <mark> = 各自 tab accent 单线下划
+ * - 失败态："糟糕，阿鸭还没写过这句"
+ * - 支持 ?q=xxx 预填查询
+ */
+import Base from '~/layouts/Base.astro';
+import SkyBanner from '~/components/SkyBanner.astro';
+import { url } from '~/lib/url';
+---
+
+<Base title="找一句 · 阿鸭的随笔">
+  <main class="screen find-page">
+    <SkyBanner />
+
+    <header class="topbar">
+      <a class="back" href={url('')}>返回</a>
+      <h1 class="title">找 一 句</h1>
+      <span class="cnt"></span>
+    </header>
+
+    <section class="find-wrap">
+      <form id="findForm" class="find-form" autocomplete="off">
+        <div class="brush-input-wrap">
+          <input
+            id="findInput"
+            class="brush-input"
+            type="search"
+            placeholder="记得是什么？"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            enterkeyhint="search"
+            aria-label="找一句"
+          />
+        </div>
+        <div class="find-counter" id="findCounter">在 <span id="findTotal">…</span> 篇里寻</div>
+      </form>
+
+      <div id="findHits" class="find-hits"></div>
+    </section>
+  </main>
+</Base>
+
+<script is:inline>
+  (function () {
+    const TAB_INFO = {
+      jg: { name: '吉光片羽', accent: '#c9a063' },
+      ds: { name: '读书笔记', accent: '#8a9aa8' },
+      qh: { name: '阿鸭情话', accent: '#c77f8a' },
+      gd: { name: '浮一大白', accent: '#b88660' },
+      wa: { name: '晚安计划', accent: '#7a8aa0' },
+    };
+    const FAIL_COPY = '糟糕，阿鸭还没写过这句';
+
+    let INDEX = null;
+    let inputEl, hitsEl, totalEl;
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    function highlight(text, q) {
+      const safe = escapeHtml(text);
+      if (!q) return safe;
+      const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+      return safe.replace(re, function (m) { return '<mark>' + m + '</mark>'; });
+    }
+    function fmtDate(iso) {
+      const parts = iso.split('-');
+      const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return M[parseInt(parts[1], 10) - 1] + ' ' + parseInt(parts[2], 10) + ', ' + parts[0];
+    }
+    function snippet(text, q, max) {
+      max = max || 140;
+      if (!q) return text.slice(0, max);
+      const idx = text.indexOf(q);
+      if (idx < 0) return text.slice(0, max);
+      const start = Math.max(0, idx - 30);
+      const end = Math.min(text.length, idx + q.length + 80);
+      const mid = text.slice(start, end);
+      return (start > 0 ? '⋯ ' : '') + mid + (end < text.length ? ' ⋯' : '');
+    }
+
+    function render(query) {
+      const q = (query || '').trim();
+      if (!INDEX) return;
+      if (!q) {
+        hitsEl.innerHTML = '';
+        return;
+      }
+      const matches = INDEX.filter(function (e) {
+        return e.text.indexOf(q) >= 0
+          || (e.from || '').indexOf(q) >= 0
+          || (e.title || '').indexOf(q) >= 0;
+      });
+      if (matches.length === 0) {
+        hitsEl.innerHTML =
+          '<div class="find-empty">' +
+            '<div class="copy">' + escapeHtml(FAIL_COPY) + '</div>' +
+            '<a class="home-link" href="/">回首页 翻翻看 →</a>' +
+          '</div>';
+        return;
+      }
+      const dividerHtml =
+        '<div class="hits-divider">' +
+          '<span class="line"></span>' +
+          '<span class="label">' + matches.length + ' 处命中</span>' +
+          '<span class="line"></span>' +
+        '</div>';
+      const cardsHtml = matches.map(function (h, i) {
+        const t = TAB_INFO[h.tab];
+        const meta =
+          '<span class="tab-name">' + t.name + '</span>' +
+          '<span class="dot">·</span>' +
+          '<span>' + fmtDate(h.date) + '</span>' +
+          (h.from ? '<span class="dot">·</span><span>' + escapeHtml(h.from) + '</span>' : '');
+        const text = snippet(h.text, q);
+        const titleHtml = h.title
+          ? '<div class="title-line">' + highlight(h.title, q) + '</div>'
+          : '';
+        return (
+          '<a class="hit" href="/' + h.tab + '/' + h.id + '/" style="--hit-accent:' + t.accent + '" data-i="' + i + '">' +
+            titleHtml +
+            '<div class="text">' + highlight(text, q) + '</div>' +
+            '<div class="meta">' + meta + '</div>' +
+          '</a>'
+        );
+      }).join('');
+      hitsEl.innerHTML = dividerHtml + '<div class="hits">' + cardsHtml + '</div>';
+    }
+
+    function init() {
+      inputEl = document.getElementById('findInput');
+      hitsEl = document.getElementById('findHits');
+      totalEl = document.getElementById('findTotal');
+      if (!inputEl || !hitsEl) return;
+
+      // 读取 ?q= 预填
+      const params = new URLSearchParams(window.location.search);
+      const initialQ = params.get('q') || '';
+      if (initialQ) inputEl.value = initialQ;
+
+      // fetch 索引
+      fetch('/find-index.json')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          INDEX = data;
+          if (totalEl) totalEl.textContent = data.length;
+          render(inputEl.value);
+        })
+        .catch(function (e) {
+          if (totalEl) totalEl.textContent = '?';
+          console.error('[find] index 加载失败', e);
+        });
+
+      inputEl.addEventListener('input', function (e) { render(e.target.value); });
+      // 自动 focus（移动端不抢焦避免键盘弹起；桌面端 focus）
+      if (!('ontouchstart' in window)) {
+        setTimeout(function () { inputEl.focus(); }, 200);
+      }
+
+      // form submit (Enter) 不刷新
+      const form = document.getElementById('findForm');
+      if (form) form.addEventListener('submit', function (e) { e.preventDefault(); });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+    document.addEventListener('astro:page-load', init);
+  })();
+</script>
+
+<style is:global>
+  .find-page {
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+  .find-page .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    height: 54px;
+    display: grid;
+    grid-template-columns: 80px 1fr 80px;
+    align-items: center;
+    padding: 0 18px;
+    background: rgba(245, 241, 233, 0.78);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .find-page .topbar .back {
+    font-family: var(--brush);
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .find-page .topbar .back:hover { color: var(--ink); }
+  .find-page .topbar .title {
+    font-family: var(--brush);
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.18em;
+    text-align: center;
+    color: var(--ink);
+  }
+  .find-page .topbar .cnt { /* spacer */ }
+
+  .find-wrap {
+    position: relative;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 48px 24px 0;
+    z-index: 5;
+  }
+  .find-form { margin-bottom: 28px; }
+  .brush-input-wrap {
+    position: relative;
+    margin-bottom: 8px;
+  }
+  .brush-input-wrap::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--ink);
+    transform-origin: left center;
+    transition: background 0.4s ease;
+  }
+  .brush-input-wrap:focus-within::after {
+    background: var(--accent, #c9a063);
+    animation: brush-stroke 0.9s cubic-bezier(.6, 0, .2, 1) forwards;
+  }
+  @keyframes brush-stroke {
+    0%   { transform: scaleX(0.55); opacity: 0.8; }
+    60%  { transform: scaleX(1.02); opacity: 1; }
+    100% { transform: scaleX(1); opacity: 1; }
+  }
+  .brush-input {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    padding: 8px 0 10px;
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 1.5;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0;
+  }
+  .brush-input::placeholder {
+    font-family: var(--hand);
+    font-weight: 400;
+    color: rgba(42, 36, 30, 0.32);
+    font-size: 18px;
+    letter-spacing: 0.06em;
+  }
+  .brush-input::-webkit-search-cancel-button { display: none; }
+  .find-counter {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 12.5px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  .find-hits { padding-bottom: 40px; }
+  .hits-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    margin: 28px 0 20px;
+  }
+  .hits-divider .line { flex: 1; height: 1px; background: var(--line); }
+  .hits-divider .label {
+    font-family: var(--hand);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    white-space: nowrap;
+  }
+  .hits {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .hit {
+    display: block;
+    background: var(--bg-paper);
+    padding: 16px 18px 18px;
+    box-shadow: var(--shadow-paper);
+    border-radius: 2px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+  }
+  .hit:nth-child(5n+1) { transform: rotate(-1.1deg); }
+  .hit:nth-child(5n+2) { transform: rotate(0.6deg);  }
+  .hit:nth-child(5n+3) { transform: rotate(-0.4deg); }
+  .hit:nth-child(5n+4) { transform: rotate(0.9deg);  }
+  .hit:nth-child(5n+5) { transform: rotate(-0.7deg); }
+  .hit:hover {
+    transform: rotate(0deg) translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06), 0 18px 32px -16px rgba(0, 0, 0, 0.18);
+  }
+  .hit .title-line {
+    font-family: var(--hand);
+    font-size: 18px;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+  }
+  .hit .text {
+    font-family: var(--serif);
+    font-size: 14.5px;
+    line-height: 1.85;
+    color: var(--ink);
+    letter-spacing: 0.015em;
+    margin-bottom: 8px;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  .hit mark {
+    background: transparent;
+    color: inherit;
+    border-bottom: 1.5px solid var(--hit-accent, #c9a063);
+    padding: 0;
+  }
+  .hit .meta {
+    font-family: var(--hand);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .hit .meta .tab-name { color: var(--hit-accent, #c9a063); }
+  .hit .meta .dot { color: var(--muted-2); }
+
+  .find-empty {
+    margin-top: 56px;
+    text-align: center;
+    padding: 40px 24px 32px;
+  }
+  .find-empty .copy {
+    font-family: var(--hand);
+    font-size: 22px;
+    line-height: 1.55;
+    color: var(--ink);
+    letter-spacing: 0.06em;
+    margin-bottom: 22px;
+  }
+  .find-empty .home-link {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .find-empty .home-link:hover { color: var(--ink); }
+
+  /* 桌面端 */
+  @media (min-width: 1024px) {
+    .find-wrap { padding-top: 96px; max-width: 720px; }
+    .brush-input { font-size: 22px; padding: 10px 0 12px; }
+    .brush-input::placeholder { font-size: 21px; }
+    .find-counter { font-size: 13.5px; margin-top: 4px; }
+  }
+</style>

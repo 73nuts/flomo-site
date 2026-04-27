@@ -5,6 +5,7 @@ import MonthSeparator from '~/components/MonthSeparator.astro';
 import SkyBanner from '~/components/SkyBanner.astro';
 import DesktopSidebar from '~/components/DesktopSidebar.astro';
 import VisitCounter from '~/components/islands/VisitCounter.svelte';
+import PullSearch from '~/components/islands/PullSearch.svelte';
 import { TABS, TAB_BY_ID, type TabId } from '~/lib/tabs';
 import { monthKey } from '~/lib/date';
 import { url } from '~/lib/url';
@@ -42,6 +43,7 @@ const title = `${tab.name} · 阿鸭的随笔`;
 
 <Base title={title} accent={tab.accent} accentRgb={tab.accentRgb}>
   <DesktopSidebar currentTab={tabParam} />
+  <PullSearch client:load />
   <main class="screen has-sidebar" transition:name="screen" transition:animate="slide">
     <SkyBanner />
 
