@@ -344,11 +344,15 @@ body.mood-night .topbar .cnt {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 0, 0, 0.35);
 }
 
-/* 居中阅读栏 */
+/* 居中阅读栏 —— 八大留白架构（R4）：z-index:5 让卡片在 sky 之上，
+   向上滚动时卡片自然覆盖 sky（八大留白 demo 行为：sky 只在初始视图可见，
+   往下读 sky 被卡片漫上来盖住）。shore 墨线 z:25 仍永远在水岸位置。 */
 .reading {
   max-width: var(--reading-max);
   margin: 0 auto;
   padding: 0 20px 80px;
+  position: relative;
+  z-index: 5;
 }
 
 /* 默认 layout 盒 */
