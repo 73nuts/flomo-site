@@ -344,18 +344,15 @@ body.mood-night .topbar .cnt {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 0, 0, 0.35);
 }
 
-/* 居中阅读栏 —— 八大留白架构（R4）：z-index:5 让卡片在 sky 之上，
-   向上滚动时卡片自然覆盖 sky（八大留白 demo 行为：sky 只在初始视图可见，
-   往下读 sky 被卡片漫上来盖住）。shore 墨线 z:25 仍永远在水岸位置。
-   **bg paper 必须有** —— 卡片之间 gap、month-sep 间隙都要兜住，
-   否则 sky 透过 gap 漏出来变成"sky 永远残留"。 */
+/* 居中阅读栏 —— 八大留白架构（R4）：z-index 不写（auto），
+   sky z:10 是「石盖」永远在卡片之上；卡片往上滚穿过 sky 底部 64px 的
+   ::after paper 渐变 → 渐隐进山 → 完全被 sky 盖住。
+   bg 也不写 —— body bg paper 在 root 层，sky 区域之外（240+）默认就是
+   米色纸；写 bg paper 反而会让 .reading 在 sky 上叠成一块矩形面板（丑）。 */
 .reading {
   max-width: var(--reading-max);
   margin: 0 auto;
   padding: 0 20px 80px;
-  position: relative;
-  z-index: 5;
-  background: var(--bg-page);
 }
 
 /* 默认 layout 盒 */

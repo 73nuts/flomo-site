@@ -66,9 +66,11 @@ const initial = skyFromHour(new Date().getHours());
      高度从原 280 缩到 240px ——「少天多纸」精神，但保留 R14 5 段山色 +
      R13 子时 8 颗 Cosmic Latte 星 + 满月 + 山墨黑全部意象。
      position: sticky 在 main flow 中钉住 viewport 顶 0..240，不再 fixed
-     避免桌面端跨过 sidebar。z-index: 0 —— 卡片 (.reading z:5) 在 sky 之上，
-     向上滚动时**卡片自然覆盖 sky**（八大留白 demo 行为）；sky 只在初始视图
-     和滚回顶部时完整可见。shore 墨线 (z:25) 永远 sticky 在 240px 作为水岸。 */
+     避免桌面端跨过 sidebar。
+     z-index: 10 —— sky 是「石盖」，永远盖在卡片之上。卡片往上滚时穿过
+     sky 底部 64px 的 ::after paper 渐变 → 渐隐 → 完全进入山被 sky 盖住，
+     "看不到这一篇内容"。这是八大留白「山水把内容兜住」的核心 —— 不是
+     卡片爬上 sky 把山盖掉（那会变成米色面板顶在山上的丑相）。 */
   #sky {
     position: sticky;
     top: 0;
@@ -76,7 +78,7 @@ const initial = skyFromHour(new Date().getHours());
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.6s cubic-bezier(0.2, 0.6, 0.2, 1), background 0.8s ease;
-    z-index: 0;
+    z-index: 10;
   }
   #sky.on { opacity: 1; }
   /* 底部柔和淡出到页面底色 ——「水岸」过渡 */
