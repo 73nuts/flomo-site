@@ -120,7 +120,9 @@ button {
   background: rgba(var(--accent-rgb, 138, 130, 114), 0.1);
 }
 
-/* 月份分隔符 —— 滚动时贴住顶栏下沿，背景透明以贴合整体质感 */
+/* 月份分隔符 —— 滚动时贴住顶栏下沿。
+   完全透明，**禁用 backdrop-filter** —— 同 .topbar 的修法，否则在 sky 上糊。
+   文字与分隔线靠 text-shadow + body.mood-* 自适应色保证读得清。 */
 .month-sep {
   display: flex;
   align-items: center;
@@ -131,11 +133,14 @@ button {
   top: 54px;
   z-index: 12;
   background: transparent;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
 .month-sep:first-of-type {
   margin-top: 28px;
+}
+.month-sep .cn,
+.month-sep .en {
+  text-shadow: 0 1px 1px rgba(255, 248, 231, 0.7), 0 0 8px rgba(255, 248, 231, 0.5);
+  transition: color 0.5s ease, text-shadow 0.5s ease;
 }
 .month-sep .cn {
   font-family: var(--brush);
@@ -153,6 +158,20 @@ button {
   flex: 1;
   height: 1px;
   background: var(--line-soft);
+  transition: background 0.5s ease;
+}
+/* 暗色 sky 段：月份文字反白成 Cosmic Latte 米色 + 深色 text-shadow，
+   分隔线改用半透明米色，让"三月 / MAR 2026"在深紫蓝夜空上读得清。 */
+body.mood-midnight .month-sep .cn,
+body.mood-midnight .month-sep .en,
+body.mood-night .month-sep .cn,
+body.mood-night .month-sep .en {
+  color: rgba(255, 248, 231, 0.88);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 0, 0, 0.35);
+}
+body.mood-midnight .month-sep .rule,
+body.mood-night .month-sep .rule {
+  background: rgba(255, 248, 231, 0.18);
 }
 
 /* 卡片通用（便签风）*/
