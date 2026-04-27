@@ -167,7 +167,7 @@
 
 | # | 触发条件 | 效果 | 实现位置 |
 |---|---|---|---|
-| 1 | 00:00-04:59 访问 | Sky banner 变深蓝星空色 + 散落星点；计数卡底部多一行「这 么 晚 还 想 我，快 去 睡 吧」+ 轻摇小月亮 🌙 | `SkyBanner.astro` · `lib/sky.ts`（midnight 类型）· `VisitCounter.svelte`（isMidnight 分支）|
+| 1 | 00:00-04:59 访问 | Sky banner 变深蓝星空色 + 8 颗 **Cosmic Latte** 星点（#FFF8E7，2003 年 Glazebrook & Baldry 用 2dF 巡天 20 万星系算出的宇宙平均色，叙事彩蛋藏在视觉里，不外露 tooltip）；计数卡底部多一行「这 么 晚 还 想 我，快 去 睡 吧」+ 轻摇小月亮 🌙 | `SkyBanner.astro` · `lib/sky.ts`（midnight 类型）· `VisitCounter.svelte`（isMidnight 分支）|
 | 2 | 当日访问次数 ≥ 10 | 计数卡底部浮现「既 然 这 么 想 我，不 如 给 我 发 消 息 吧」，左侧一枚线描信封 SVG | `VisitCounter.svelte`（n >= 10 分支）|
 | 3 | 阅读页点击底部「终」字 | 终字弹跳 + 5 颗小心随机飞散上浮 + 顶部浮现「你 看 完 啦 ~」1.8s | `EndMark.svelte` island（`[slug].astro` 引用）|
 | 4 | 首页头像 2 秒内连点 10 次 | DOM 粒子烟花：45 颗主波 + 200ms 后 12 颗余波，♥✦✧❀❁✿❤ × 6 色，translate3d GPU 合成 | `index.astro` inline script + `#fireworks-layer` |
@@ -202,7 +202,7 @@
 | afternoon | 青翠分明：淡米青天 + 山轮廓清晰 |
 | dusk | 逆光剪影：暖橙天 + 落日 + 山墨黑 |
 | night | 月在山上：深蓝天 + 左侧月亮 + 散星 + 山墨蓝 |
-| midnight | 墨浓如黑（R13 彩蛋）：极深紫蓝 + 满月 + 8 颗星 + 山近黑 |
+| midnight | 墨浓如黑（R13 彩蛋）：极深紫蓝 + 满月 + 8 颗 Cosmic Latte 星（#FFF8E7，宇宙平均色）+ 山近黑 |
 
 **禁止**（之前迭代踩过的坑）：
 - ❌ 5 段都用单色相暖橙/暖金底色 → "看起来一样"
@@ -211,6 +211,8 @@
 - ❌ radial 衰减 `transparent 60%` 与 linear stop 撞同一带 → 撞色 banding
 - ❌ `apply()` 用 `el.className = 'sky ' + mood` 重写整段 className → 吞掉 fadeIn 的 `.on` 类，每分钟闪一下。**必须用 `classList.remove(...)/add(...)` 单独操作时段类**
 - ❌ 把 SkyBanner 改回 svelte 岛屿（R6 锁定，历史 mobile bug）
+- ❌ 把 midnight 8 颗星点 fill 改回纯白 `rgba(255, 255, 255, …)`（R13 锁定为 Cosmic Latte `rgba(255, 248, 231, …)`，宇宙平均色叙事不能丢）
+- ❌ 给 midnight 星点加 hover tooltip 暴露考据（"知道的人会心一笑"原则：彩蛋藏在视觉里就够了，外露说明会显得很不自然）
 
 **契约维护**：`mood()` inline JS 与 `src/lib/sky.ts skyFromHour` 是两份代码（inline script 不能 import TS），靠注释 `与 src/lib/sky.ts skyFromHour 严格对齐` 维护契约。
 
