@@ -40,6 +40,17 @@
 
   /* 阅读栏最大宽度 */
   --reading-max: 640px;
+
+  /* topbar 实际高度 —— .month-sep 用它当 sticky top 偏移，否则 month-sep 落在
+     topbar 内部撞在一起。3 个 viewport 各自覆盖：默认 94 / 小屏 78 / 桌面 66。 */
+  --topbar-h: 94px;
+}
+
+@media (max-width: 480px) {
+  :root { --topbar-h: 78px; }
+}
+@media (min-width: 1024px) {
+  :root { --topbar-h: 66px; }
 }
 
 *,
@@ -130,7 +141,8 @@ button {
   padding: 10px 4px 8px;
   margin-top: 18px;
   position: sticky;
-  top: 54px;
+  /* 跟随 topbar 实际高度 sticky，否则 month-sep 落在 topbar 内部撞色带 */
+  top: var(--topbar-h, 94px);
   z-index: 12;
   background: transparent;
 }
@@ -373,9 +385,7 @@ body.scrolled .month-sep .rule { background: var(--line-soft); }
     max-width: 720px;
     padding: 0 40px 120px;
   }
-  .month-sep {
-    top: 32px;
-  }
+  /* .month-sep top 由 :root --topbar-h 媒体查询统一管理（66px on desktop），不再写死 */
 }
 
 /* 阅读纸面 */
