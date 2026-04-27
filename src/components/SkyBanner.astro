@@ -65,7 +65,7 @@ const initial = skyFromHour(new Date().getHours());
     z-index: 0;
   }
   #sky.on { opacity: 1; }
-  /* 底部柔和淡出到页面底色 */
+  /* 底部柔和淡出到页面底色（仅亮色时段使用，midnight/night 关掉） */
   #sky::after {
     content: '';
     position: absolute;
@@ -77,6 +77,8 @@ const initial = skyFromHour(new Date().getHours());
     pointer-events: none;
     z-index: 2;
   }
+  /* midnight 是深邃夜空，硬边切到米底 —— 不做暖色过渡，否则下半段一片粉紫雾 */
+  #sky.midnight::after { display: none; }
   /* 远山 SVG：固定形状、占满 sky 容器，山色与浓淡走 CSS variable */
   #sky .mountains {
     position: absolute;
@@ -132,20 +134,23 @@ const initial = skyFromHour(new Date().getHours());
       radial-gradient(1px 1px at 70% 38%, rgba(255, 255, 255, 0.45) 50%, transparent 51%),
       linear-gradient(180deg, #2a3148 0%, #545068 35%, #c8b9b3 78%, #f5f1e9 100%);
   }
-  /* 深夜彩蛋（R13 锁定）：满月 + 8 颗星点 + 极深紫蓝 + 山墨浓如黑
-     星点用 Cosmic Latte #FFF8E7 = rgb(255,248,231)，是 2003 年 Glazebrook & Baldry
-     用 2dF 巡天 20 万星系算出的宇宙平均色。月色 rgb(255,250,225) 不动。
+  /* 深夜彩蛋（R13 锁定）：满月 + 8 颗 Cosmic Latte 星点 + 全程深邃夜空 + 山墨浓如黑
+     星点 #FFF8E7 = 2003 年 2dF 巡天 20 万星系的宇宙平均色。月色 rgb(255,250,225) 不动。
 
-     星点必须**硬边像素点**：50%/51% 硬切，无光晕。之前给 halo 8 颗叠出
-     一片奶白雾，整个夜空糊成一团。星不是云，是针尖。 */
+     设计要点：
+     - **整片夜空必须深邃**：不要 6 段跨色相过渡到米色，那会让下半段变成粉紫雾。
+       改为 0% → 100% 全在 #050810 ~ #0c1224 区间内细微变化。
+     - **硬边切到米底**：上面 ::after { display: none } 关掉淡出。sky banner 是
+       contained 视觉块，不是大气晕染。
+     - **星点硬边像素**：50%/51% 硬切，无 halo —— 加 halo 会糊成奶白雾。 */
   #sky.midnight {
-    --mtn-far:  #1a2240;
-    --mtn-far-op:  0.78;
-    --mtn-near: #050918;
-    --mtn-near-op: 0.96;
+    --mtn-far:  #1f2540;
+    --mtn-far-op:  1;
+    --mtn-near: #060a18;
+    --mtn-near-op: 1;
     background:
-      radial-gradient(circle 14px at 75% 36px, rgba(255, 250, 225, 0.95) 60%, rgba(255, 250, 225, 0) 85%),
-      radial-gradient(circle 40px at 75% 36px, rgba(255, 250, 225, 0.18), transparent 70%),
+      radial-gradient(circle 14px at 75% 36px, rgba(255, 250, 225, 1)    60%, rgba(255, 250, 225, 0) 85%),
+      radial-gradient(circle 36px at 75% 36px, rgba(255, 250, 225, 0.16), transparent 72%),
       radial-gradient(2.4px 2.4px at 14% 18%, rgba(255, 248, 231, 1)    50%, transparent 51%),
       radial-gradient(2px   2px   at 30% 32%, rgba(255, 248, 231, 0.92) 50%, transparent 51%),
       radial-gradient(2.4px 2.4px at 48% 18%, rgba(255, 248, 231, 1)    50%, transparent 51%),
@@ -154,6 +159,6 @@ const initial = skyFromHour(new Date().getHours());
       radial-gradient(2.4px 2.4px at 22% 50%, rgba(255, 248, 231, 0.82) 50%, transparent 51%),
       radial-gradient(2px   2px   at 42% 56%, rgba(255, 248, 231, 0.75) 50%, transparent 51%),
       radial-gradient(2.2px 2.2px at 70% 60%, rgba(255, 248, 231, 0.7)  50%, transparent 51%),
-      linear-gradient(180deg, #0c1230 0%, #1a2150 28%, #36325c 58%, #6c5876 78%, #a8908a 92%, #f5f1e9 100%);
+      linear-gradient(180deg, #050810 0%, #07091a 50%, #0a0d1f 100%);
   }
 </style>
