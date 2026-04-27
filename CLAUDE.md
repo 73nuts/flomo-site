@@ -6,6 +6,49 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 这是 **阿鸭的随笔**（`https://ayalife.cc`）—— 一个把 flomo 短笔记按 5 个标签分组、每条 memo 独立 URL、可分享可 SEO 的静态站。**不是博客、不是产品页**，是慢写慢读的页面。视觉先于功能，**设计规范先于代码**。
 
+## 协作流程（必读）
+
+### 视觉/排版/动效/配色改动 —— 先做 demo，不要直接动 `src/`
+
+**触发条件**：用户提出视觉痛点（"不好看"、"没 good taste"、"段落不舒服"、"sky 突兀"、"长得一样"），或要求改 sky / typography / 颜色 / 字体 / 间距 / 装饰元素。
+
+**流程**：
+
+1. 调用 `frontend-design:frontend-design` skill
+2. skill 输出到项目根 `*-demo.html` 的 standalone HTML（如 `sky-demo.html` / `typography-demo.html`）—— git untracked，**不进 build 不上线**
+3. 让用户打开浏览器看完，明确选择方向 + 提出具体调整
+4. 才落地到 `src/` → commit → push
+
+**Why**：站点的核心价值是视觉（README 第一句"视觉先于功能"），且我（Claude Code）在 Chrome 里看不见真实手机 viewport（Claude in Chrome 扩展 sidebar 占满，innerWidth 只剩 ~133px），盲调容易越调越偏。用户多次明确要求："你不要直接动手啊，应该用 frontend-design skill 慢慢调整"。
+
+**灵感必须命名引用**：每个候选方向附具体灵感锚点（范宽 / 马远 /《富春山居图》/ 杉本博司 / 汪曾祺 / 董桥 / Paris Review / 单读 / Bear / Day One / Bringhurst 等），不能用"现代极简"、"温暖纸感"这类 AI 通用模糊描述 —— 用户能识别。
+
+**例外**：纯逻辑 bug 修复（横向溢出兜底、`apply()` 吞掉 `.on` 类、CF 缓存绕法）不走 demo 流程，直接修。
+
+### Commit 流水线（避开 guard-commit hook）
+
+`~/.claude/hooks/guard-commit.sh` 卡 commit 需先触发 `mark-review-passed.sh`：
+
+```bash
+pnpm build 2>&1 | tail -3 && \
+  echo "code-review pass: <一句描述>，0 issues" && \
+  git add <files> && \
+  git commit -m "..." && \
+  git push origin master
+```
+
+`echo` 命令文本必须含 `code-review` 或 `codex-review`，输出**不能含** `CRITICAL` / `HIGH` / `FAIL` / `ERROR` / `panic`（用 "0 issues" 不要用 "0 errors"）。`Skill` 通道触发的 review **不走** Bash hook，所以 Skill review 完之后还要补一条 `echo` 才能 commit。
+
+### CF 边缘缓存绕法
+
+`ayalife.cc` 走 Cloudflare 代理。push + Pages deploy 完成后用户访问可能仍看到旧 HTML。验证用：
+
+```
+https://ayalife.cc/jg/?v=任意值
+```
+
+CF 把 `?v=x` 当成新 URL 直接回源。要清缓存：CF Dashboard → Caching → Purge Everything。
+
 ## 常用命令
 
 ```bash
