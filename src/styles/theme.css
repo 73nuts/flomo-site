@@ -160,17 +160,18 @@ button {
   background: var(--line-soft);
   transition: background 0.5s ease;
 }
-/* 暗色 sky 段：月份文字反白成 Cosmic Latte 米色 + 深色 text-shadow，
-   分隔线改用半透明米色，让"三月 / MAR 2026"在深紫蓝夜空上读得清。 */
-body.mood-midnight .month-sep .cn,
-body.mood-midnight .month-sep .en,
-body.mood-night .month-sep .cn,
-body.mood-night .month-sep .en {
+/* 暗色 sky 段（且未滚动）：月份文字反白成 Cosmic Latte 米色 + 深色 text-shadow，
+   分隔线改用半透明米色，让"三月 / MAR 2026"在深紫蓝夜空上读得清。
+   :not(.scrolled) 限定 —— 滚动时被下方 body.scrolled 规则覆盖。 */
+body.mood-midnight:not(.scrolled) .month-sep .cn,
+body.mood-midnight:not(.scrolled) .month-sep .en,
+body.mood-night:not(.scrolled) .month-sep .cn,
+body.mood-night:not(.scrolled) .month-sep .en {
   color: rgba(255, 248, 231, 0.88);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 0, 0, 0.35);
 }
-body.mood-midnight .month-sep .rule,
-body.mood-night .month-sep .rule {
+body.mood-midnight:not(.scrolled) .month-sep .rule,
+body.mood-night:not(.scrolled) .month-sep .rule {
   background: rgba(255, 248, 231, 0.18);
 }
 
@@ -306,18 +307,44 @@ body.mood-night .month-sep .rule {
   color: var(--muted);
   font-feature-settings: 'tnum';
 }
-/* 暗色 sky 段：文字反白成 Cosmic Latte 米色 + 深色 text-shadow，
+/* 暗色 sky 段（且未滚动）：文字反白成 Cosmic Latte 米色 + 深色 text-shadow，
    让"返回 / 标题 / N 则"在深紫蓝夜空 / 墨蓝夜空上读得清。
-   body.mood-* class 由 SkyBanner.astro inline script 注入。 */
-body.mood-midnight .topbar .back,
-body.mood-midnight .topbar .title,
-body.mood-midnight .topbar .cnt,
-body.mood-night .topbar .back,
-body.mood-night .topbar .title,
-body.mood-night .topbar .cnt {
+   body.mood-* + body.scrolled 由 SkyBanner.astro inline script 注入。
+   :not(.scrolled) 限定 —— 滚动时被下方 body.scrolled 规则覆盖。 */
+body.mood-midnight:not(.scrolled) .topbar .back,
+body.mood-midnight:not(.scrolled) .topbar .title,
+body.mood-midnight:not(.scrolled) .topbar .cnt,
+body.mood-night:not(.scrolled) .topbar .back,
+body.mood-night:not(.scrolled) .topbar .title,
+body.mood-night:not(.scrolled) .topbar .cnt {
   color: rgba(255, 248, 231, 0.92);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 0, 0, 0.35);
 }
+
+/* 滚动时：topbar / month-sep 给一层 opaque 米色挡住下方滚动卡片，
+   防止透明态下卡片透过来视觉混乱（用户反馈"滑动时全都累在一起"）。
+   滚动时背景已是 paper，跟 sky 无关，所以也把暗色 mood 的反白文字盖回 ink。
+   transition 让阈值跨越（scrollY=8）时 bg/color 平滑切换。 */
+body.scrolled .topbar,
+body.scrolled .month-sep {
+  background: rgba(245, 241, 233, 0.96);
+  border-bottom: 1px solid rgba(42, 36, 30, 0.06);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+body.scrolled .topbar .back,
+body.scrolled .topbar .title,
+body.scrolled .topbar .cnt,
+body.scrolled .month-sep .cn,
+body.scrolled .month-sep .en {
+  text-shadow: none;
+}
+/* 各元素恢复默认色（覆盖 mood- 反白） */
+body.scrolled .topbar .back  { color: var(--ink-soft); }
+body.scrolled .topbar .title { color: var(--ink); }
+body.scrolled .topbar .cnt   { color: var(--muted); }
+body.scrolled .month-sep .cn { color: var(--ink-soft); }
+body.scrolled .month-sep .en { color: var(--muted-2); }
+body.scrolled .month-sep .rule { background: var(--line-soft); }
 
 /* 居中阅读栏 */
 .reading {

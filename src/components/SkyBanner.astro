@@ -51,10 +51,26 @@ const initial = skyFromHour(new Date().getHours());
       var el = document.getElementById('sky');
       if (el) requestAnimationFrame(function () { el.classList.add('on'); });
     }
+    /* 滚动状态同步给 body —— 不滚动时 topbar/month-sep 透明（让 sky 透出来），
+       滚动时给它们 opaque bg（防止下方卡片透过来视觉混乱）。 */
+    function updateScrolled() {
+      if (!document.body) return;
+      if (window.scrollY > 8) {
+        document.body.classList.add('scrolled');
+      } else {
+        document.body.classList.remove('scrolled');
+      }
+    }
     apply();
     fadeIn();
+    updateScrolled();
     setInterval(apply, 60 * 1000);
-    document.addEventListener('astro:page-load', function () { apply(); fadeIn(); });
+    window.addEventListener('scroll', updateScrolled, { passive: true });
+    document.addEventListener('astro:page-load', function () {
+      apply();
+      fadeIn();
+      updateScrolled();
+    });
   })();
 </script>
 
