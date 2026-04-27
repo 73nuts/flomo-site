@@ -120,9 +120,7 @@ button {
   background: rgba(var(--accent-rgb, 138, 130, 114), 0.1);
 }
 
-/* 月份分隔符 —— 滚动时贴住顶栏下沿。
-   半透明米色底（不全透明）：保证 midnight/night 深色 sky 下文字仍有对比，
-   亮色 sky 下又几乎看不出底色叠加。68% 是手调的临界点。 */
+/* 月份分隔符 —— 滚动时贴住顶栏下沿，背景透明以贴合整体质感 */
 .month-sep {
   display: flex;
   align-items: center;
@@ -132,9 +130,9 @@ button {
   position: sticky;
   top: 54px;
   z-index: 12;
-  background: rgba(245, 241, 233, 0.68);
-  backdrop-filter: blur(8px) saturate(110%);
-  -webkit-backdrop-filter: blur(8px) saturate(110%);
+  background: transparent;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 .month-sep:first-of-type {
   margin-top: 28px;
@@ -252,12 +250,10 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 60px 20px 12px;
-  /* 半透明米色底（不全透明）：保证 midnight/night 深色 sky 下"返回 / 标题 / N 则"
-     都读得清；亮色 sky 下又几乎看不出底色叠加。比单纯 backdrop-filter 多一层米色滤
-     镜。72% 是手调过的临界点。 */
-  background: rgba(245, 241, 233, 0.72);
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  /* 透明背景让 sky 色透过；轻微毛玻璃保证深色 sky 下文字可读 */
+  background: transparent;
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
   /* 下沿细过渡：滚过 sky 后依然有层次 */
   mask-image: linear-gradient(to bottom, #000 70%, rgba(0,0,0,0.85));
   -webkit-mask-image: linear-gradient(to bottom, #000 70%, rgba(0,0,0,0.85));
