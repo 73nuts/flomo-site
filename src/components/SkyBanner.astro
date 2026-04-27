@@ -135,24 +135,25 @@ const initial = skyFromHour(new Date().getHours());
   /* 深夜彩蛋（R13 锁定）：满月 + 8 颗星点 + 极深紫蓝 + 山墨浓如黑
      星点用 Cosmic Latte #FFF8E7 = rgb(255,248,231)，是 2003 年 Glazebrook & Baldry
      用 2dF 巡天 20 万星系算出的宇宙平均色。月色 rgb(255,250,225) 不动。
-     每颗星的 radial-gradient：硬核心 (0-22% 实色) + 软光晕 (22-78% 衰减)，
-     这样在 #36325c 中天色上才看得见；纯 2.5px size + 40% stop 等于把核心做没。 */
+
+     星点必须**硬边像素点**：50%/51% 硬切，无光晕。之前给 halo 8 颗叠出
+     一片奶白雾，整个夜空糊成一团。星不是云，是针尖。 */
   #sky.midnight {
-    --mtn-far:  #0a0e22;
-    --mtn-far-op:  0.82;
-    --mtn-near: #040614;
-    --mtn-near-op: 0.95;
+    --mtn-far:  #1a2240;
+    --mtn-far-op:  0.78;
+    --mtn-near: #050918;
+    --mtn-near-op: 0.96;
     background:
       radial-gradient(circle 14px at 75% 36px, rgba(255, 250, 225, 0.95) 60%, rgba(255, 250, 225, 0) 85%),
       radial-gradient(circle 40px at 75% 36px, rgba(255, 250, 225, 0.18), transparent 70%),
-      radial-gradient(circle 5.5px at 14% 18%, rgba(255, 248, 231, 1) 0%, rgba(255, 248, 231, 1) 22%, rgba(255, 248, 231, 0.42) 48%, rgba(255, 248, 231, 0.08) 78%, transparent 100%),
-      radial-gradient(circle 4px   at 30% 32%, rgba(255, 248, 231, 1) 0%, rgba(255, 248, 231, 0.95) 22%, rgba(255, 248, 231, 0.32) 48%, rgba(255, 248, 231, 0.06) 78%, transparent 100%),
-      radial-gradient(circle 5px   at 48% 18%, rgba(255, 248, 231, 1) 0%, rgba(255, 248, 231, 1) 22%, rgba(255, 248, 231, 0.4)  48%, rgba(255, 248, 231, 0.08) 78%, transparent 100%),
-      radial-gradient(circle 4.5px at 60% 38%, rgba(255, 248, 231, 1) 0%, rgba(255, 248, 231, 0.92) 22%, rgba(255, 248, 231, 0.28) 48%, rgba(255, 248, 231, 0.06) 78%, transparent 100%),
-      radial-gradient(circle 5px   at 88% 14%, rgba(255, 248, 231, 1) 0%, rgba(255, 248, 231, 0.95) 22%, rgba(255, 248, 231, 0.32) 48%, rgba(255, 248, 231, 0.06) 78%, transparent 100%),
-      radial-gradient(circle 5.5px at 22% 50%, rgba(255, 248, 231, 1) 0%, rgba(255, 248, 231, 0.85) 22%, rgba(255, 248, 231, 0.25) 48%, rgba(255, 248, 231, 0.05) 78%, transparent 100%),
-      radial-gradient(circle 4px   at 42% 56%, rgba(255, 248, 231, 1) 0%, rgba(255, 248, 231, 0.78) 22%, rgba(255, 248, 231, 0.22) 48%, rgba(255, 248, 231, 0.05) 78%, transparent 100%),
-      radial-gradient(circle 4.5px at 70% 60%, rgba(255, 248, 231, 1) 0%, rgba(255, 248, 231, 0.7)  22%, rgba(255, 248, 231, 0.2)  48%, rgba(255, 248, 231, 0.04) 78%, transparent 100%),
+      radial-gradient(2.4px 2.4px at 14% 18%, rgba(255, 248, 231, 1)    50%, transparent 51%),
+      radial-gradient(2px   2px   at 30% 32%, rgba(255, 248, 231, 0.92) 50%, transparent 51%),
+      radial-gradient(2.4px 2.4px at 48% 18%, rgba(255, 248, 231, 1)    50%, transparent 51%),
+      radial-gradient(2.2px 2.2px at 60% 38%, rgba(255, 248, 231, 0.88) 50%, transparent 51%),
+      radial-gradient(2.2px 2.2px at 88% 14%, rgba(255, 248, 231, 0.95) 50%, transparent 51%),
+      radial-gradient(2.4px 2.4px at 22% 50%, rgba(255, 248, 231, 0.82) 50%, transparent 51%),
+      radial-gradient(2px   2px   at 42% 56%, rgba(255, 248, 231, 0.75) 50%, transparent 51%),
+      radial-gradient(2.2px 2.2px at 70% 60%, rgba(255, 248, 231, 0.7)  50%, transparent 51%),
       linear-gradient(180deg, #0c1230 0%, #1a2150 28%, #36325c 58%, #6c5876 78%, #a8908a 92%, #f5f1e9 100%);
   }
 </style>
